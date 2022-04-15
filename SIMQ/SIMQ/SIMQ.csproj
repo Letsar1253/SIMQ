@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\User\.nuget\packages\centerspace.nmath.standard.windows.x64\7.4.0.7\build\x64\libarpack.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\User\.nuget\packages\centerspace.nmath.standard.windows.x64\7.4.0.7\build\x64\libiomp5md.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\User\.nuget\packages\centerspace.nmath.standard.windows.x64\7.4.0.7\build\x64\nmath_native_x64.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="C:\Users\User\.nuget\packages\centerspace.nmath.standard.windows.x64\7.4.0.7\build\x64\nmath_sf_x64.dll" />
+  </ItemGroup>
+
+</Project>
