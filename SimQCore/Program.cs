@@ -1,14 +1,18 @@
-﻿using SimQCore.BaseModels;
-using SimQCore.CustomModels;
+﻿using SimQCore.Library;
+using SimQCore.Modeller;
+using SimQCore.Modeller.BaseModels;
+using SimQCore.Modeller.CustomModels;
+using SimQCore.Modeller.Simulation;
 using System.Collections.Generic;
-using SimQCore.Simulation;
 
 namespace SimQCore
 {
     class Program
     {
         static void Main()
-        {   
+        {
+            Tests.TestTimeGeneration1();
+
             SimulationModeller SM = new();
 
             SM.ModelTimeMax = 30;
