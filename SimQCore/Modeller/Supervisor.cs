@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SimQCore.Modeller.Supervisors
+namespace SimQCore.Modeller
 {
     /// <summary>
     /// Класс представляет Диспетчера СМО.

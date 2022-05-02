@@ -1,12 +1,11 @@
-﻿using SimQCore.Modeller.Supervisors;
-using System;
+﻿using System;
 
-namespace SimQCore.Modeller.Simulation
+namespace SimQCore.Modeller
 {
     class SimulationModeller
     {
         private readonly Supervisor Supervisor = new();
-        public double ModelTimeMax { get; set; }
+        public double ModelTimeMax { get; set; } = 50;
         private bool IsDone(double t) => t >= ModelTimeMax;
 
         public void Simulate(Problem problem)

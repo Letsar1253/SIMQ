@@ -2,7 +2,6 @@
 using SimQCore.Modeller;
 using SimQCore.Modeller.BaseModels;
 using SimQCore.Modeller.CustomModels;
-using SimQCore.Modeller.Simulation;
 using System.Collections.Generic;
 
 namespace SimQCore
@@ -11,11 +10,11 @@ namespace SimQCore
     {
         static void Main()
         {
+            // Часть Миши
             Tests.TestTimeGeneration1();
 
+            // Часть Эмиля
             SimulationModeller SM = new();
-
-            SM.ModelTimeMax = 30;
 
             SimpleServiceBlock serviceBlock = new();
             SimpleStackBunker simpleStack = new();
