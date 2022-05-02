@@ -1,5 +1,4 @@
-﻿using SimQCore.Modeller.BaseModels;
-using SimQCore.Modeller.Supervisors;
+﻿using SimQCore.Modeller.Supervisors;
 using System;
 
 namespace SimQCore.Modeller.Simulation
@@ -20,10 +19,14 @@ namespace SimQCore.Modeller.Simulation
             while (!IsDone(T))
             {
                 Event nextEvent = Supervisor.GetNextEvent();
-                //double deltaT = nextEvent.ModelTime - T;
-                T = nextEvent.ModelTime;
 
-                //Statistic.SaveState(delta);
+                // Для статистических данных.
+                //double deltaT = nextEvent.ModelTime - T;
+
+                T = nextEvent.ModelTimeStamp;
+
+                // В данном сегменте кода должен проходить сбор статистических данных.
+                //Statistic.SaveState(delta); 
 
                 Supervisor.Actions[nextEvent.Agent.EventTag](nextEvent.Agent, T);
             }
