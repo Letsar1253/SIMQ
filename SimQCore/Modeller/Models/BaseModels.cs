@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace SimQCore.BaseModels
+﻿namespace SimQCore.Modeller.BaseModels
 {
     enum AgentType
     {
@@ -53,16 +51,5 @@ namespace SimQCore.BaseModels
         public abstract bool IsFull { get; }
         public abstract bool IsEmpty { get; }
         public override AgentType Type => AgentType.Buffer;
-    }
-
-    struct Event
-    {
-        public double ModelTime;
-        public AgentModel Agent;
-    }
-    struct Problem
-    {
-        public int MaxModelTime;
-        public List<AgentModel> Agents;
     }
 }

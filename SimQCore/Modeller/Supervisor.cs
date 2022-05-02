@@ -1,14 +1,29 @@
-﻿using SimQCore.BaseModels;
+﻿using SimQCore.Modeller.BaseModels;
 using System;
 using System.Collections.Generic;
 
-namespace SimQCore.Supervisors
+namespace SimQCore.Modeller.Supervisors
 {
+    /// <summary>
+    /// Класс представляет Диспетчера СМО.
+    /// </summary>
+    /// <remarks>
+    /// Диспетчер обеспечивает связь между объектами СМО.
+    /// Передача заявок от агента к агенту осуществляется внутри данного класса.
+    /// </remarks>
     class Supervisor
     {
+        /// <summary>
+        /// Коллекция методов, вызываемых по наступлению событий.
+        /// </summary>
         public Dictionary<string, Func<AgentModel, double, bool>> Actions = new();
 
+        /// <summary>
+        /// Коллекцию действующих объектов СМО.
+        /// Объекты имеют тип <paramref name="AgentModel" />.
+        /// </summary>
         public List<AgentModel> AllAgents;
+
         private List<AgentModel> _activeModels = new();
 
         private bool SendCallToServices(Call call, double T)
@@ -22,6 +37,9 @@ namespace SimQCore.Supervisors
             return false;
         }
 
+        /// <summary>
+        /// Метод подготавливает <paramref name="Диспетчера"/> к дальнейшей работе.
+        /// </summary>
         public void Setup(Problem problem)
         {
             AllAgents = problem.Agents;
@@ -54,6 +72,11 @@ namespace SimQCore.Supervisors
             // Установление ещё каких-либо настроек диспетчера (в зависимости от задачи)
         }
 
+        /// <summary>
+        /// Метод возвращает следующее моделируемое событие.
+        /// </summary>
+        /// <returns>Следующее событие <paramref name="Event"/></returns>
+        /// <param name="arg">The argument to the method</param>
         public Event GetNextEvent()
         {
             AgentModel nextAgent = null;
@@ -72,7 +95,7 @@ namespace SimQCore.Supervisors
             if (nextAgent == null) throw new NotSupportedException();
 
             Event newEvent = new() {
-                ModelTime = minT,
+                ModelTimeStamp = minT,
                 Agent = nextAgent,
             };
             return newEvent;

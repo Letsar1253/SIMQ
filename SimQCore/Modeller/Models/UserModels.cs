@@ -1,13 +1,13 @@
-﻿using SimQCore.BaseModels;
+﻿using SimQCore.Library.Distributions;
+using SimQCore.Modeller.BaseModels;
 using System;
 using System.Collections.Generic;
 
-namespace SimQCore.CustomModels
+namespace SimQCore.Modeller.CustomModels
 {
     class SimpleSource : Source
     {
-        const double Lyambda = 0.2;
-        Random rnd = new();
+        private IDistribution dist = new PoissonDistribution(0.2);
 
         private int callCounter;
         private string _sourceID;
@@ -32,7 +32,9 @@ namespace SimQCore.CustomModels
 
         private double CalcNextEventTime(double T)
         {
-            _tau = T - Math.Log(rnd.NextDouble()) / Lyambda;
+            // https://habr.com/ru/post/265321/
+                
+            _tau = T + dist.Generate();
             return _tau;
         }
 
@@ -41,8 +43,7 @@ namespace SimQCore.CustomModels
 
     class SimpleServiceBlock : ServiceBlock
     {
-        const double Lyambda = 0.3;
-        Random rnd = new();
+        private IDistribution dist = new PoissonDistribution(0.3);
 
         private double _delta = double.PositiveInfinity;
         private Call _processCall;
@@ -65,7 +66,7 @@ namespace SimQCore.CustomModels
 
         private double gS(double T)
         {
-            return T - Math.Log(rnd.NextDouble()) / Lyambda;
+            return T + dist.Generate();
         }
 
         private Call EndProcessCall()
