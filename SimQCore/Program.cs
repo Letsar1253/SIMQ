@@ -6,7 +6,6 @@ using SimQCore.Modeller.BaseModels;
 using SimQCore.Modeller.CustomModels;
 using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace SimQCore
 {
@@ -14,14 +13,12 @@ namespace SimQCore
     {
         static void Main()
         {
-            //Данил
-            Random random = new Random();
-            Storage db = new Storage();
-            string id = "62615b68b332c2974ce4628d";
+            // Часть Данила
+            //Storage db = new Storage();
+            //string id = "62615b68b332c2974ce4628d";
             //db.ReadAllDocuments();
             //db.ReadDocument(id);
             //Problem problem1 = Problem.DeserializeBson(id);
-
 
             // Часть Миши
             Tests.TestTimeGeneration1();
@@ -45,10 +42,10 @@ namespace SimQCore
             Problem problem = new() {
                 Agents = list,
                 Date = DateTime.Now,
-                Name = $"rand {random.Next(100)}",
+                Name = $"rand {new Random().Next(100)}",
             };
-            //Данил
-            db.CreateDocument(problem.ToBsonDocument());
+            // Часть Данила
+            //db.CreateDocument(problem.ToBsonDocument());
 
             SM.Simulate(problem);
         }
