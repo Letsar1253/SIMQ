@@ -1,4 +1,9 @@
-﻿using SimQCore.Modeller.BaseModels;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Attributes;
+using SimQCore.DataBase;
+using SimQCore.Modeller.BaseModels;
+using System;
 using System.Collections.Generic;
 
 namespace SimQCore.Modeller
@@ -14,8 +19,12 @@ namespace SimQCore.Modeller
         /// </summary>
         public AgentModel Agent;
     }
-    struct Problem
+    class Problem
     {
+        [BsonId]
+        public ObjectId _id;
+        public DateTime Date;
+        public string Name;
         /// <summary>
         /// Время, в течение которого будет выполняться моделирование.
         /// </summary>
@@ -40,5 +49,11 @@ namespace SimQCore.Modeller
         /// Список связей для всех существующих агентов.
         /// </summary>
         public Dictionary<string, List<AgentModel>> Links;
+
+        public static Problem DeserializeBson(string id)
+        {
+            var doc = Storage.GetDocument(id);
+            return BsonSerializer.Deserialize<Problem>(doc);
+        }
     }
 }
