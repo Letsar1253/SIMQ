@@ -1,4 +1,5 @@
-﻿using SimQCore.Library.Distributions;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using SimQCore.Library.Distributions;
 using SimQCore.Modeller.BaseModels;
 using System;
 using System.Collections.Generic;
@@ -7,10 +8,14 @@ namespace SimQCore.Modeller.CustomModels
 {
     class SimpleSource : Source
     {
+        [BsonElement]
         private IDistribution dist = new PoissonDistribution(0.2);
 
+        [BsonElement]
         private int callCounter;
+        [BsonElement]
         private string _sourceID;
+        [BsonElement]
         private double _tau;
         public override string Id { get => _sourceID; set => _sourceID = value; }
         public override string EventTag => "SimpleSource";
@@ -31,9 +36,7 @@ namespace SimQCore.Modeller.CustomModels
         public override double NextEventTime => _tau;
 
         private double CalcNextEventTime(double T)
-        {
-            // https://habr.com/ru/post/265321/
-                
+        {                
             _tau = T + dist.Generate();
             return _tau;
         }
@@ -43,11 +46,16 @@ namespace SimQCore.Modeller.CustomModels
 
     class SimpleServiceBlock : ServiceBlock
     {
+        [BsonElement]
         private IDistribution dist = new PoissonDistribution(0.3);
 
+        [BsonElement]
         private double _delta = double.PositiveInfinity;
+        [BsonElement]
         private Call _processCall;
+        [BsonElement]
         List<BaseModels.Buffer> _bindedBuffers = new();
+        [BsonElement]
         private string _serverBlockId;
 
         public override Call ProcessCall => _processCall;
@@ -64,10 +72,7 @@ namespace SimQCore.Modeller.CustomModels
             return true;
         }
 
-        private double gS(double T)
-        {
-            return T + dist.Generate();
-        }
+        private double gS(double T) => T + dist.Generate();
 
         private Call EndProcessCall()
         {
@@ -120,10 +125,14 @@ namespace SimQCore.Modeller.CustomModels
 
     class SimpleStackBunker : BaseModels.Buffer
     {
+        [BsonElement]
         private Stack<Call> _calls = new();
+        [BsonElement]
         public override string Id { get; set; }
+
         public override bool IsEmpty => _calls.Count == 0;
         public override bool IsFull => _calls.Count > 200;
+
         public override Call PassCall() {
             return IsEmpty ? null : _calls.Pop();
         }
@@ -143,7 +152,9 @@ namespace SimQCore.Modeller.CustomModels
 
     class SimpleQueueBunker : BaseModels.Buffer
     {
+        [BsonElement]
         private Queue<Call> _calls = new();
+        [BsonElement]
         public override string Id { get; set; }
         public override bool IsEmpty => _calls.Count == 0;
         public override bool IsFull => _calls.Count > 200;
@@ -168,6 +179,7 @@ namespace SimQCore.Modeller.CustomModels
 
     class SimpleCall : Call
     {
+        [BsonElement]
         public override string Id { get; set; }
         public override string EventTag => "Call";
         public override Call DoEvent(double T) => throw new NotImplementedException();
