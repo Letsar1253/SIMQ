@@ -16,7 +16,7 @@ namespace SimQCore.DataBase
 
         public Storage()
         {
-            var settings = MongoClientSettings.FromConnectionString(local);
+            var settings = MongoClientSettings.FromConnectionString(cluster);
             settings.ServerApi = new ServerApi(ServerApiVersion.V1);
             client = new MongoClient(settings);
             SetCurrentDataBase("SimQ");
