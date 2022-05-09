@@ -9,21 +9,47 @@ namespace SimQCore.Modeller.CustomModels
     class SimpleSource : Source
     {
         [BsonElement]
-        private IDistribution dist = new PoissonDistribution(0.2);
+        private IDistribution _distribution;
 
         [BsonElement]
-        private int callCounter;
+        private int _callCounter;
+
         [BsonElement]
         private string _sourceID;
+
         [BsonElement]
         private double _tau;
+
+        private Func<AgentModel, List<AgentModel>, double, bool> EventAction = (Agent, Links, T) =>
+        {
+            Call call = Agent.DoEvent(T);
+
+            Console.WriteLine("Модельное время: {0}, агент: {1}, заявка {2} поступила.",
+                T, Agent.Id, call.Id);
+
+            foreach (var serviceBlock in Links)
+            {
+                if (serviceBlock.Type == AgentType.ServiceBlock)
+                    if (((ServiceBlock)serviceBlock).TakeCall(call, T)) return true;
+            }
+
+            return false;
+        };
+
+        public SimpleSource() : base()
+        {
+            _distribution = new PoissonDistribution(0.2);
+            _tau = CalcNextEventTime(0);
+
+            Supervisor.AddAction(EventTag, EventAction);
+        }
+
         public override string Id { get => _sourceID; set => _sourceID = value; }
         public override string EventTag => "SimpleSource";
-        public SimpleSource() : base() => _tau = CalcNextEventTime(0);
 
         private Call CreateCall()
         {
-            SimpleCall call = new() { Id = "CALL_" + Id + "_" + callCounter++ };
+            SimpleCall call = new() { Id = "CALL_" + Id + "_" + _callCounter++ };
             return call;
         }
 
@@ -37,7 +63,7 @@ namespace SimQCore.Modeller.CustomModels
 
         private double CalcNextEventTime(double T)
         {                
-            _tau = T + dist.Generate();
+            _tau = T + _distribution.Generate();
             return _tau;
         }
 
@@ -47,16 +73,36 @@ namespace SimQCore.Modeller.CustomModels
     class SimpleServiceBlock : ServiceBlock
     {
         [BsonElement]
-        private IDistribution dist = new PoissonDistribution(0.3);
+        private IDistribution _distribution;
 
         [BsonElement]
         private double _delta = double.PositiveInfinity;
+
         [BsonElement]
         private Call _processCall;
+
         [BsonElement]
         List<BaseModels.Buffer> _bindedBuffers = new();
+
         [BsonElement]
         private string _serverBlockId;
+
+        private Func<AgentModel, List<AgentModel>, double, bool> EventAction = (Agent, _, T) =>
+        {
+            Call call = Agent.DoEvent(T);
+
+            Console.WriteLine("Модельное время: {0}, агент: {1}, заявка {2} обработана.",
+                T, Agent.Id, call.Id);
+
+            return true;
+        };
+
+        public SimpleServiceBlock() : base()
+        {
+            _distribution = new PoissonDistribution(0.3);
+
+            Supervisor.AddAction(EventTag, EventAction);
+        }
 
         public override Call ProcessCall => _processCall;
         public override string Id { get => _serverBlockId; set => _serverBlockId = value; }
@@ -72,7 +118,7 @@ namespace SimQCore.Modeller.CustomModels
             return true;
         }
 
-        private double gS(double T) => T + dist.Generate();
+        private double gS(double T) => T + _distribution.Generate();
 
         private Call EndProcessCall()
         {
@@ -127,6 +173,7 @@ namespace SimQCore.Modeller.CustomModels
     {
         [BsonElement]
         private Stack<Call> _calls = new();
+
         [BsonElement]
         public override string Id { get; set; }
 
@@ -154,8 +201,10 @@ namespace SimQCore.Modeller.CustomModels
     {
         [BsonElement]
         private Queue<Call> _calls = new();
+
         [BsonElement]
         public override string Id { get; set; }
+
         public override bool IsEmpty => _calls.Count == 0;
         public override bool IsFull => _calls.Count > 200;
 

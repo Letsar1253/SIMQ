@@ -33,16 +33,24 @@ namespace SimQCore
 
             serviceBlock.BindBunker(simpleStack);
 
-            List<AgentModel> list = new();
-            list.Add(source1);
-            list.Add(source2);
-            list.Add(serviceBlock);
-            list.Add(simpleStack);
+            List<AgentModel> AgentList = new();
+            AgentList.Add(source1);
+            AgentList.Add(source2);
+            AgentList.Add(serviceBlock);
+            AgentList.Add(simpleStack);
+
+            List<AgentModel> sourceLinks = new();
+            sourceLinks.Add(serviceBlock);
+
+            Dictionary<string, List<AgentModel>> LinkList = new();
+            LinkList.Add(source1.Id, sourceLinks);
+            LinkList.Add(source2.Id, sourceLinks);
 
             Problem problem = new() {
-                Agents = list,
+                Agents = AgentList,
                 Date = DateTime.Now,
                 Name = $"rand {new Random().Next(100)}",
+                Links = LinkList,
             };
             // Часть Данила
             //db.CreateDocument(problem.ToBsonDocument());

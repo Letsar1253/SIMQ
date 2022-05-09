@@ -27,7 +27,7 @@ namespace SimQCore.Modeller
                 // В данном сегменте кода должен проходить сбор статистических данных.
                 //Statistic.SaveState(delta); 
 
-                Supervisor.Actions[nextEvent.Agent.EventTag](nextEvent.Agent, T);
+                Supervisor.FireEvent(nextEvent, T);
             }
 
             Console.WriteLine("Моделирование окончено.");

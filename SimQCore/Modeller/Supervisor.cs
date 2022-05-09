@@ -14,9 +14,20 @@ namespace SimQCore.Modeller
     class Supervisor
     {
         /// <summary>
+        /// Коллекция, содержащая всех активных агентов, используемых в моделировании.
+        /// </summary>
+        private List<AgentModel> _activeModels = new();
+
+        /// <summary>
         /// Коллекция методов, вызываемых по наступлению событий.
         /// </summary>
-        public Dictionary<string, Func<AgentModel, double, bool>> Actions = new();
+        public static Dictionary<string, Func<AgentModel, List<AgentModel>, double, bool>> Actions = new();
+
+        /// <summary>
+        /// Коллекция связей агентов. Используется при вызове того или иного события.
+        /// Позволяет направлять заявки далее выбранному агенту.
+        /// </summary>
+        public Dictionary<string, List<AgentModel>> Links { get; set; }
 
         /// <summary>
         /// Коллекцию действующих объектов СМО.
@@ -24,17 +35,19 @@ namespace SimQCore.Modeller
         /// </summary>
         public List<AgentModel> AllAgents;
 
-        private List<AgentModel> _activeModels = new();
-
-        private bool SendCallToServices(Call call, double T)
+        /// <summary>
+        /// Метод позволяет добавить в коллекцию новое действие, 
+        /// совершаемое при наступлении события агента с тэгом EventTag.
+        /// </summary>
+        /// <param name="EventTag">Тэг агента, использующийся для определения действия, 
+        /// выполняемого при наступлении события.
+        /// </param>
+        /// <param name="Action">Действие, выполняемое при наступлении события.</param>
+        public static void AddAction( string EventTag, 
+            Func<AgentModel, List<AgentModel>, double, bool> Action)
         {
-            foreach (var serviceBlock in AllAgents)
-            {
-                if (serviceBlock.Type == AgentType.ServiceBlock)
-                    if (((ServiceBlock)serviceBlock).TakeCall(call, T)) return true;
-            }
-
-            return false;
+            if(!Actions.ContainsKey(EventTag))
+                Actions.Add(EventTag, Action);
         }
 
         /// <summary>
@@ -49,27 +62,23 @@ namespace SimQCore.Modeller
                 if (agent.IsActive()) _activeModels.Add(agent);
             }
 
-            Actions["SimpleServiceBlock"] = (agent, T) =>
-            {
-                Call call = agent.DoEvent(T);
-
-                Console.WriteLine("Модельное время: {0}, агент: {1}, заявка {2} обработана.",
-                    T, agent.Id, call.Id);
-
-                return true;
-            };
-
-            Actions["SimpleSource"] = (agent, T) =>
-            {
-                Call call = agent.DoEvent(T);
-
-                Console.WriteLine("Модельное время: {0}, агент: {1}, заявка {2} поступила.",
-                    T, agent.Id, call.Id);
-               
-                return SendCallToServices(call, T);
-            };
+            Links = problem.Links;
 
             // Установление ещё каких-либо настроек диспетчера (в зависимости от задачи)
+        }
+
+
+        /// <summary>
+        /// Метод выполняет действие, совершаемое при возникшем событии.
+        /// </summary>
+        /// <param name="e">Описание происходящего события.</param>
+        /// <param name="ModelTime">Текущее модельное время.</param>
+        public void FireEvent(Event e, double ModelTime)
+        {
+            var Agent = e.Agent;
+            var AgentLinks = Links.ContainsKey(Agent.Id) ? Links[Agent.Id] : null;
+
+            Actions[Agent.EventTag](Agent, AgentLinks, ModelTime);
         }
 
         /// <summary>
