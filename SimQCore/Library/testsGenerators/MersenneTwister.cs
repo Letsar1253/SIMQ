@@ -13,7 +13,7 @@
 
 using System;
 
-namespace SimQCore.Library.testsGenerators
+namespace SimQCore.Library.TestsGenerators
 {
     /// <summary>
     /// Random number generator using Mersenne Twister algorithm

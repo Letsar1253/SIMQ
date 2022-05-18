@@ -1,4 +1,4 @@
-﻿namespace SimQCore.Library.testsGenerators
+﻿namespace SimQCore.Library.TestsGenerators
 {
     public class PCG
     {

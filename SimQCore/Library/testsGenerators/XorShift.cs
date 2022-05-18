@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SimQCore.Library.testsGenerators
+namespace SimQCore.Library.TestsGenerators
 {
     /// <summary>
     /// A fast random number generator for .NET
