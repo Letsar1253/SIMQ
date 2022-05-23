@@ -38,7 +38,7 @@
         public override string EventTag => "ServiceBlock";
         public override AgentType Type => AgentType.SERVICE_BLOCK;
         public abstract Call ProcessCall { get; }
-        public abstract void BindBunker(Buffer buffer);
+        public abstract void BindBuffer(Buffer buffer);
         public abstract bool TakeCall(Call call, double T);
     }
 

@@ -31,7 +31,7 @@ namespace SimQCore
             SimpleSource source1 = new();
             SimpleSource source2 = new();
 
-            serviceBlock.BindBunker(simpleStack);
+            serviceBlock.BindBuffer(simpleStack);
 
             List<AgentModel> AgentList = new();
             AgentList.Add(source1);

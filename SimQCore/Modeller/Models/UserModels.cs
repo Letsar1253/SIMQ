@@ -109,7 +109,7 @@ namespace SimQCore.Modeller.CustomModels
         public bool IsFree => _processCall == null;
         public override string EventTag => "SimpleServiceBlock";
         public override double NextEventTime => _delta;
-        public override void BindBunker(BaseModels.Buffer bunker) => _bindedBuffers.Add(bunker);
+        public override void BindBuffer(BaseModels.Buffer bunker) => _bindedBuffers.Add(bunker);
 
         private bool AcceptCall(Call call, double T)
         {
