@@ -2,10 +2,10 @@
 {
     enum AgentType
     {
-        Source,
-        ServiceBlock,
-        Buffer,
-        Call
+        SOURCE,
+        SERVICE_BLOCK,
+        BUFFER,
+        CALL
     }
 
     abstract class AgentModel {
@@ -20,7 +20,7 @@
     abstract class Call : AgentModel
     {
         public override string EventTag => "Call";
-        public override AgentType Type => AgentType.Call;
+        public override AgentType Type => AgentType.CALL;
     }
 
     abstract class Source : AgentModel
@@ -28,7 +28,7 @@
         private static int _objectCounter;
         public Source() => Id = "SRC_" + _objectCounter++;
         public override string EventTag => "Source";
-        public override AgentType Type => AgentType.Source;
+        public override AgentType Type => AgentType.SOURCE;
     }
 
     abstract class ServiceBlock : AgentModel
@@ -36,7 +36,7 @@
         private static int _objectCounter;
         public ServiceBlock() => Id = "SBLOCK_" + _objectCounter++;
         public override string EventTag => "ServiceBlock";
-        public override AgentType Type => AgentType.ServiceBlock;
+        public override AgentType Type => AgentType.SERVICE_BLOCK;
         public abstract Call ProcessCall { get; }
         public abstract void BindBunker(Buffer buffer);
         public abstract bool TakeCall(Call call, double T);
@@ -50,6 +50,6 @@
         public abstract Call PassCall();
         public abstract bool IsFull { get; }
         public abstract bool IsEmpty { get; }
-        public override AgentType Type => AgentType.Buffer;
+        public override AgentType Type => AgentType.BUFFER;
     }
 }

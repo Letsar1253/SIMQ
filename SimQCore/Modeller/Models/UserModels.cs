@@ -29,7 +29,7 @@ namespace SimQCore.Modeller.CustomModels
 
             foreach (var serviceBlock in Links)
             {
-                if (serviceBlock.Type == AgentType.ServiceBlock)
+                if (serviceBlock.Type == AgentType.SERVICE_BLOCK)
                     if (((ServiceBlock)serviceBlock).TakeCall(call, T)) return true;
             }
 
@@ -234,6 +234,6 @@ namespace SimQCore.Modeller.CustomModels
         public override Call DoEvent(double T) => throw new NotImplementedException();
         public override bool IsActive() => false;
         public override double NextEventTime => double.PositiveInfinity;
-        public override AgentType Type => AgentType.Call;
+        public override AgentType Type => AgentType.CALL;
     }
 }
