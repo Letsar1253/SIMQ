@@ -1,23 +1,28 @@
-﻿using System;
+﻿namespace SimQCore.Modeller {
+    class SimulationModeller {
+        /// <summary>
+        /// Метод проверяет, закончено ли моделирование текущей задачи.
+        /// </summary>
+        /// <param name="t">Текущее модельное время.</param>
+        /// <returns>True - в случае, если моделирование окончено, иначе false.</returns>
+        private bool IsDone( double t ) => t >= MaxModelationTime;
 
-namespace SimQCore.Modeller
-{
-    class SimulationModeller
-    {
-        private readonly Supervisor Supervisor = new();
-        public double ModelTimeMax { get; set; } = 50;
-        private bool IsDone(double t) => t >= ModelTimeMax;
+        /// <summary>
+        /// Максимальное время моделирования. По умолчанию - 30.
+        /// </summary>
+        public double MaxModelationTime = 30;
 
-        public void Simulate(Problem problem)
-        {
-            Supervisor.Setup(problem);
+        public void Simulate( Problem problem ) {
+            MaxModelationTime = problem.MaxModelationTime ?? MaxModelationTime;
 
-            Console.WriteLine("Моделирование началось.");
+            Supervisor supervisor = new();
+            supervisor.Setup( problem );
+
+            Misc.Log( $"Моделирование задачи \"{ problem.Name }\" началось.", LogStatus.WARNING );
 
             double T = 0;
-            while (!IsDone(T))
-            {
-                Event nextEvent = Supervisor.GetNextEvent();
+            while( !IsDone( T ) ) {
+                Event nextEvent = supervisor.GetNextEvent();
 
                 // Для статистических данных.
                 //double deltaT = nextEvent.ModelTime - T;
@@ -27,10 +32,10 @@ namespace SimQCore.Modeller
                 // В данном сегменте кода должен проходить сбор статистических данных.
                 //Statistic.SaveState(delta); 
 
-                Supervisor.FireEvent(nextEvent, T);
+                supervisor.FireEvent( nextEvent );
             }
 
-            Console.WriteLine("Моделирование окончено.");
+            Misc.Log( "\nМоделирование окончено.", LogStatus.WARNING );
         }
     }
 }

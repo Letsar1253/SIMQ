@@ -1,55 +1,84 @@
-﻿namespace SimQCore.Modeller.BaseModels
-{
-    enum AgentType
-    {
-        SOURCE,
-        SERVICE_BLOCK,
-        BUFFER,
-        CALL
+﻿namespace SimQCore.Modeller.BaseModels {
+
+    enum AgentType {
+        SOURCE,         // Источник входящих заявок
+        SERVICE_BLOCK,  // Блок приборов
+        BUFFER,         // Очередь
+        CALL,           // Заявка
+        ORBIT           // Орбита
     }
 
-    abstract class AgentModel {
-        public abstract string Id { get; set; }
-        public abstract Call DoEvent(double T);
+    interface IModellingAgent {
+        public string Id { get; }
+        public BaseCall DoEvent( double T );
+        public double NextEventTime { get; }
+        public string EventTag { get; }
+        public AgentType Type { get; }
+        public bool IsActive();
+    }
+
+    abstract class BaseSource: IModellingAgent {
+        private static int idCounter;
+        public virtual string Id { get; protected set; }
         public abstract double NextEventTime { get; }
         public abstract string EventTag { get; }
-        public abstract AgentType Type { get; }
+        public AgentType Type { get; } = AgentType.SOURCE;
+        public BaseSource() => Id = "Source_" + idCounter++;
+        public abstract BaseCall DoEvent( double T );
         public abstract bool IsActive();
     }
 
-    abstract class Call : AgentModel
-    {
-        public override string EventTag => "Call";
-        public override AgentType Type => AgentType.CALL;
+    abstract class BaseServiceBlock: IModellingAgent {
+        private static int idCounter;
+        public virtual string Id { get; protected set; }
+        public abstract double NextEventTime { get; }
+        public abstract string EventTag { get; }
+        public AgentType Type { get; } = AgentType.SERVICE_BLOCK;
+        public abstract BaseCall ProcessCall { get; }
+        public BaseServiceBlock() => Id = "ServiceBlock_" + idCounter++;
+        public abstract BaseCall DoEvent( double T );
+        public abstract bool IsActive();
+        public abstract bool IsFree();
+        public abstract void BindBuffer( BaseBuffer buffer );
+        public abstract bool TakeCall( BaseCall call, double T );
     }
 
-    abstract class Source : AgentModel
-    {
-        private static int _objectCounter;
-        public Source() => Id = "SRC_" + _objectCounter++;
-        public override string EventTag => "Source";
-        public override AgentType Type => AgentType.SOURCE;
-    }
-
-    abstract class ServiceBlock : AgentModel
-    {
-        private static int _objectCounter;
-        public ServiceBlock() => Id = "SBLOCK_" + _objectCounter++;
-        public override string EventTag => "ServiceBlock";
-        public override AgentType Type => AgentType.SERVICE_BLOCK;
-        public abstract Call ProcessCall { get; }
-        public abstract void BindBuffer(Buffer buffer);
-        public abstract bool TakeCall(Call call, double T);
-    }
-
-    abstract class Buffer : AgentModel
-    {
-        private static int _objectCounter;
-        public Buffer() => Id = "BUNK_" + _objectCounter++;
-        public abstract bool TakeCall(Call call);
-        public abstract Call PassCall();
+    abstract class BaseBuffer: IModellingAgent {
+        private static int idCounter;
+        public virtual string Id { get; protected set; }
+        public abstract double NextEventTime { get; }
+        public abstract string EventTag { get; }
+        public AgentType Type { get; } = AgentType.BUFFER;
         public abstract bool IsFull { get; }
         public abstract bool IsEmpty { get; }
-        public override AgentType Type => AgentType.BUFFER;
+        public BaseBuffer() => Id = "Buffer_" + idCounter++;
+        public abstract bool TakeCall( BaseCall call );
+        public abstract BaseCall PassCall();
+        public abstract BaseCall DoEvent( double T );
+        public abstract bool IsActive();
+    }
+
+    abstract class BaseCall: IModellingAgent {
+        private static int idCounter;
+        public virtual string Id { get; set; }
+        public abstract double NextEventTime { get; }
+        public abstract string EventTag { get; }
+        public AgentType Type { get; } = AgentType.CALL;
+        public BaseCall() => Id = "Call_" + idCounter++;
+        public abstract BaseCall DoEvent( double T );
+        public abstract bool IsActive();
+    }
+
+    abstract class BaseOrbit: IModellingAgent {
+        private static int idCounter;
+        public virtual string Id { get; protected set; }
+        public abstract double NextEventTime { get; }
+        public abstract string EventTag { get; }
+        public AgentType Type { get; } = AgentType.ORBIT;
+        public BaseOrbit() => Id = "Orbit_" + idCounter++;
+        public abstract BaseCall DoEvent( double T );
+        public abstract bool IsActive();
+        public abstract bool TakeCall( BaseCall call, double T );
+        public abstract BaseCall PeekNextCall( double T );
     }
 }

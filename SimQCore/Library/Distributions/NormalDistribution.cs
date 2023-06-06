@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using SimQCore.Library.testsGenerators;
+using SimQCore.Library.TestsGenerators;
 
 namespace SimQCore.Library.Distributions
 {

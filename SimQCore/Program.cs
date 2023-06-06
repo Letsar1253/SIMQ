@@ -1,61 +1,230 @@
-﻿using MongoDB.Bson;
-using SimQCore.DataBase;
-using SimQCore.Library;
+﻿using SimQCore.Library.Distributions;
 using SimQCore.Modeller;
 using SimQCore.Modeller.BaseModels;
 using SimQCore.Modeller.CustomModels;
 using System;
 using System.Collections.Generic;
 
-namespace SimQCore
-{
-    class Program
-    {
-        static void Main()
-        {
-            // Часть Данила
-            //Storage db = new Storage();
-            //string id = "62615b68b332c2974ce4628d";
-            //db.ReadAllDocuments();
-            //db.ReadDocument(id);
-            //Problem problem1 = Problem.DeserializeBson(id);
-
-            // Часть Миши
-            Tests.TestTimeGeneration1();
-
-            // Часть Эмиля
+namespace SimQCore {
+    class Program {
+        static void Main() {
             SimulationModeller SM = new();
 
-            SimpleServiceBlock serviceBlock = new();
-            SimpleStackBunker simpleStack = new();
-            SimpleSource source1 = new();
-            SimpleSource source2 = new();
+            initExampleProblems();
+            SM.Simulate( examples [3] );
+        }
 
-            serviceBlock.BindBuffer(simpleStack);
+        /** Коллекция задач-примеров. */
+        private static List<Problem> examples = new();
 
-            List<AgentModel> AgentList = new();
-            AgentList.Add(source1);
-            AgentList.Add(source2);
-            AgentList.Add(serviceBlock);
-            AgentList.Add(simpleStack);
+        /** Метод инициализирует 4 задачи, используемые в качестве примеров. */
+        private static void initExampleProblems() {
 
-            List<AgentModel> sourceLinks = new();
-            sourceLinks.Add(serviceBlock);
+            // Общие переменные.
+            Dictionary<string, List<IModellingAgent>> linkList;
+            List<IModellingAgent> agentList;
+            List<IModellingAgent> sourcesLinks;
+            BaseSource source1, source2, source3, source4;
+            BaseServiceBlock serviceBlock1, serviceBlock2;
+            QueueBuffer queue1, queue2, queue3;
 
-            Dictionary<string, List<AgentModel>> LinkList = new();
-            LinkList.Add(source1.Id, sourceLinks);
-            LinkList.Add(source2.Id, sourceLinks);
+            //  ----------[[ Задача 1 ]]----------
 
-            Problem problem = new() {
-                Agents = AgentList,
-                Date = DateTime.Now,
-                Name = $"rand {new Random().Next(100)}",
-                Links = LinkList,
+            source1 = new Source( new ExponentialDistribution( 0.2 ) );
+            source2 = new Source( new ExponentialDistribution( 0.4 ) );
+            source3 = new Source( new ExponentialDistribution( 0.6 ) );
+
+            queue1 = new( 6 );
+            queue2 = new();
+
+            serviceBlock1 = new ServiceBlock( new ExponentialDistribution( 0.3 ) );
+            serviceBlock2 = new ServiceBlock( new ExponentialDistribution( 0.7 ) );
+
+            sourcesLinks = new() {
+                serviceBlock1, serviceBlock2
             };
-            // Часть Данила
-            //db.CreateDocument(problem.ToBsonDocument());
 
-            SM.Simulate(problem);
+            agentList = new() {
+                source1, source2, source3,
+                queue1, queue2,
+                serviceBlock1, serviceBlock2
+            };
+
+            serviceBlock1.BindBuffer( queue1 );
+            serviceBlock1.BindBuffer( queue2 );
+
+            serviceBlock2.BindBuffer( queue1 );
+            serviceBlock2.BindBuffer( queue2 );
+
+            linkList = new() {
+                {
+                    source1.Id,
+                    sourcesLinks
+                },
+                {
+                    source2.Id,
+                    sourcesLinks
+                },
+                {
+                    source3.Id,
+                    sourcesLinks
+                }
+            };
+
+            examples.Add( new() {
+                Agents = agentList,
+                Date = DateTime.Now,
+                Name = $"Example 1.",
+                Links = linkList
+            } );
+
+            //  ----------[[ Задача 2 ]]----------
+
+            source1 = new Source( new ExponentialDistribution( 0.2 ) );
+            source2 = new Source( new ExponentialDistribution( 0.4 ) );
+
+            Orbit orbit = new( new ExponentialDistribution( 0.5 ) );
+
+            serviceBlock1 = new ServiceBlock( new ExponentialDistribution( 0.3 ) );
+
+            agentList = new() {
+                source1, source2,
+                orbit,
+                serviceBlock1
+            };
+
+            sourcesLinks = new() {
+                serviceBlock1,
+                orbit
+            };
+
+            List<IModellingAgent> orbitLinks = new() {
+                serviceBlock1
+            };
+
+            linkList = new() {
+                {
+                    source1.Id,
+                    sourcesLinks
+                },
+                {
+                    source2.Id,
+                    sourcesLinks
+                },
+                {
+                    orbit.Id,
+                    orbitLinks
+                }
+            };
+
+            examples.Add( new() {
+                Agents = agentList,
+                Date = DateTime.Now,
+                Name = $"Example 2.",
+                Links = linkList
+            } );
+
+            //  ----------[[ Задача 3 ]]----------
+
+            source1 = new Source( new ExponentialDistribution( 0.2 ) );
+            source2 = new Source( new ExponentialDistribution( 0.4 ) );
+            source3 = new Source( new ExponentialDistribution( 0.6 ) );
+            source4 = new Source( new ExponentialDistribution( 0.8 ) );
+
+            queue1 = new( 3 );
+            queue2 = new( 2 );
+            queue3 = new( 4 );
+
+            serviceBlock1 = new PollingServiceBlock( new ExponentialDistribution( 0.5 ), 3 );
+            serviceBlock2 = new PollingServiceBlock( new ExponentialDistribution( 0.6 ), 3 );
+
+            serviceBlock1.BindBuffer( queue1 );
+            serviceBlock1.BindBuffer( queue2 );
+            serviceBlock1.BindBuffer( queue3 );
+
+            serviceBlock2.BindBuffer( queue1 );
+            serviceBlock2.BindBuffer( queue2 );
+            serviceBlock2.BindBuffer( queue3 );
+
+            sourcesLinks = new() {
+                serviceBlock1, serviceBlock2
+            };
+
+            linkList = new() {
+                {
+                    source1.Id,
+                    sourcesLinks
+                },
+                {
+                    source2.Id,
+                    sourcesLinks
+                },
+                {
+                    source3.Id,
+                    sourcesLinks
+                },
+                {
+                    source4.Id,
+                    sourcesLinks
+                }
+            };
+
+            agentList = new() {
+                source1, source2, source3, source4,
+                queue1, queue2, queue3,
+                serviceBlock1, serviceBlock2
+            };
+
+            examples.Add( new() {
+                Agents = agentList,
+                Date = DateTime.Now,
+                Name = $"Example 3.",
+                Links = linkList
+            } );
+
+            //  ----------[[ Задача 4 ]]----------
+
+            source1 = new FiniteSource( new ExponentialDistribution( 0.2 ) );
+            source2 = new FiniteSource( new ExponentialDistribution( 0.4 ) );
+            source3 = new FiniteSource( new ExponentialDistribution( 0.6 ) );
+
+            queue1 = new QueueBuffer( 3 );
+
+            serviceBlock1 = new ServiceBlock( new ExponentialDistribution( 0.5 ) );
+
+            serviceBlock1.BindBuffer( queue1 );
+
+            sourcesLinks = new() {
+                serviceBlock1
+            };
+
+            linkList = new() {
+                {
+                    source1.Id,
+                    sourcesLinks
+                },
+                {
+                    source2.Id,
+                    sourcesLinks
+                },
+                {
+                    source3.Id,
+                    sourcesLinks
+                }
+            };
+
+            agentList = new() {
+                source1, source2, source3,
+                queue1,
+                serviceBlock1
+            };
+
+            examples.Add( new() {
+                Agents = agentList,
+                Date = DateTime.Now,
+                Name = $"Example 4.",
+                Links = linkList
+            } );
         }
     }
 }

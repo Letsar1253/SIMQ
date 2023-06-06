@@ -2,8 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SimQCore.Modeller
-{
+namespace SimQCore.Modeller {
     /// <summary>
     /// Класс представляет Диспетчера СМО.
     /// </summary>
@@ -11,29 +10,30 @@ namespace SimQCore.Modeller
     /// Диспетчер обеспечивает связь между объектами СМО.
     /// Передача заявок от агента к агенту осуществляется внутри данного класса.
     /// </remarks>
-    class Supervisor
-    {
+    class Supervisor {
         /// <summary>
         /// Коллекция, содержащая всех активных агентов, используемых в моделировании.
         /// </summary>
-        private List<AgentModel> _activeModels = new();
+        private List<IModellingAgent> activeModels;
 
         /// <summary>
         /// Коллекция методов, вызываемых по наступлению событий.
         /// </summary>
-        public static Dictionary<string, Func<AgentModel, List<AgentModel>, double, bool>> Actions = new();
+        public static Dictionary<string, Func<IModellingAgent, List<IModellingAgent>, double, bool>> Actions = new();
 
         /// <summary>
         /// Коллекция связей агентов. Используется при вызове того или иного события.
         /// Позволяет направлять заявки далее выбранному агенту.
         /// </summary>
-        public Dictionary<string, List<AgentModel>> Links { get; set; }
+        public Dictionary<string, List<IModellingAgent>> Links {
+            get; set;
+        }
 
         /// <summary>
-        /// Коллекцию действующих объектов СМО.
+        /// Коллекция действующих объектов СМО.
         /// Объекты имеют тип <paramref name="AgentModel" />.
         /// </summary>
-        public List<AgentModel> AllAgents;
+        public List<IModellingAgent> AllAgents;
 
         /// <summary>
         /// Метод позволяет добавить в коллекцию новое действие, 
@@ -43,26 +43,27 @@ namespace SimQCore.Modeller
         /// выполняемого при наступлении события.
         /// </param>
         /// <param name="Action">Действие, выполняемое при наступлении события.</param>
-        public static void AddAction( string EventTag, 
-            Func<AgentModel, List<AgentModel>, double, bool> Action)
-        {
-            if(!Actions.ContainsKey(EventTag))
-                Actions.Add(EventTag, Action);
+        public static void AddAction( string EventTag,
+            Func<IModellingAgent, List<IModellingAgent>, double, bool> Action ) {
+
+            if( !Actions.ContainsKey( EventTag ) ) {
+                Actions.Add( EventTag, Action );
+            }
         }
 
         /// <summary>
-        /// Метод подготавливает <paramref name="Диспетчера"/> к дальнейшей работе.
+        /// Метод подготавливает диспетчера к моделированию задачи.
         /// </summary>
-        public void Setup(Problem problem)
-        {
+        public void Setup( Problem problem ) {
             AllAgents = problem.Agents;
-
-            foreach (var agent in AllAgents)
-            {
-                if (agent.IsActive()) _activeModels.Add(agent);
-            }
-
             Links = problem.Links;
+
+            activeModels = new();
+            foreach( IModellingAgent agent in AllAgents ) {
+                if( agent.IsActive() ) {
+                    activeModels.Add( agent );
+                }
+            }
 
             // Установление ещё каких-либо настроек диспетчера (в зависимости от задачи)
         }
@@ -73,12 +74,12 @@ namespace SimQCore.Modeller
         /// </summary>
         /// <param name="e">Описание происходящего события.</param>
         /// <param name="ModelTime">Текущее модельное время.</param>
-        public void FireEvent(Event e, double ModelTime)
-        {
-            var Agent = e.Agent;
-            var AgentLinks = Links.ContainsKey(Agent.Id) ? Links[Agent.Id] : null;
-
-            Actions[Agent.EventTag](Agent, AgentLinks, ModelTime);
+        public void FireEvent( Event e ) {
+            IModellingAgent Agent = e.Agent;
+            List<IModellingAgent> AgentLinks = Links.ContainsKey( Agent.Id ) 
+                                            ? Links[ Agent.Id ] 
+                                            : null;
+            Actions[ Agent.EventTag ]( Agent, AgentLinks, e.ModelTimeStamp );
         }
 
         /// <summary>
@@ -86,22 +87,21 @@ namespace SimQCore.Modeller
         /// </summary>
         /// <returns>Следующее событие <paramref name="Event"/></returns>
         /// <param name="arg">The argument to the method</param>
-        public Event GetNextEvent()
-        {
-            AgentModel nextAgent = null;
+        public Event GetNextEvent() {
+            IModellingAgent nextAgent = null;
             double minT = double.PositiveInfinity;
 
-            foreach (var agent in _activeModels)
-            {
+            foreach( IModellingAgent agent in activeModels ) {
                 double agentEventTime = agent.NextEventTime;
-                if (agentEventTime <= minT)
-                {
+                if( agentEventTime <= minT ) {
                     minT = agentEventTime;
                     nextAgent = agent;
                 }
             }
 
-            if (nextAgent == null) throw new NotSupportedException();
+            if( nextAgent == null ) {
+                throw new NotSupportedException();
+            }
 
             Event newEvent = new() {
                 ModelTimeStamp = minT,

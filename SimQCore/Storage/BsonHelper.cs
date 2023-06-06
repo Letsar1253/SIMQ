@@ -7,11 +7,11 @@ namespace SimQCore.BsonHelper
     {
         public static void DeserializeProblem()
         {
-            BsonClassMap.RegisterClassMap<SimpleSource>();
-            BsonClassMap.RegisterClassMap<SimpleServiceBlock>();
-            BsonClassMap.RegisterClassMap<SimpleStackBunker>();
-            BsonClassMap.RegisterClassMap<SimpleCall>();
-            BsonClassMap.RegisterClassMap<SimpleQueueBunker>();
+            BsonClassMap.RegisterClassMap<Source>();
+            BsonClassMap.RegisterClassMap<ServiceBlock>();
+            BsonClassMap.RegisterClassMap<StackBuffer>();
+            BsonClassMap.RegisterClassMap<Call>();
+            BsonClassMap.RegisterClassMap<QueueBuffer>();
         }
     }
 }

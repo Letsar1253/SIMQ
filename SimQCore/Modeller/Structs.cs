@@ -6,24 +6,30 @@ using SimQCore.Modeller.BaseModels;
 using System;
 using System.Collections.Generic;
 
-namespace SimQCore.Modeller
-{
-    struct Event
-    {
+namespace SimQCore.Modeller {
+    struct Event {
         /// <summary>
-        /// Модельное время возникновения события.
+        /// Модельное время возникшего события.
         /// </summary>
         public double ModelTimeStamp;
         /// <summary>
         /// Агент, вызвавший событие.
         /// </summary>
-        public AgentModel Agent;
+        public IModellingAgent Agent;
     }
-    class Problem
-    {
+    class Problem {
+        /// <summary>
+        /// Идентификатор задачи.
+        /// </summary>
         [BsonId]
         public ObjectId _id;
+        /// <summary>
+        /// Дата создания задачи.
+        /// </summary>
         public DateTime Date;
+        /// <summary>
+        /// Наименование задачи.
+        /// </summary>
         public string Name;
         /// <summary>
         /// Время, в течение которого будет выполняться моделирование.
@@ -32,7 +38,7 @@ namespace SimQCore.Modeller
         /// <summary>
         /// Предельное количество поступающих заявок, при достижении которого моделирование будет окончено.
         /// </summary>
-        public int? MaxModelationCalls;
+        public int? MaxIncomingCalls;
         /// <summary>
         /// Максимальное количество шагов, при достижении которого моделирование будет окончено.
         /// </summary>
@@ -40,20 +46,18 @@ namespace SimQCore.Modeller
         /// <summary>
         /// Максимальное модельное время, при достижении которого моделирование будет окончено.
         /// </summary>
-        public int? MaxModelationTime;
+        public double? MaxModelationTime;
         /// <summary>
         /// Список агентов, участвующих в системе.
         /// </summary>
-        public List<AgentModel> Agents;
+        public List<IModellingAgent> Agents;
         /// <summary>
         /// Список связей для всех существующих агентов.
         /// </summary>
-        public Dictionary<string, List<AgentModel>> Links;
+        public Dictionary<string, List<IModellingAgent>> Links;
 
-        public static Problem DeserializeBson(string id)
-        {
-            var doc = Storage.GetDocument(id);
-            return BsonSerializer.Deserialize<Problem>(doc);
+        public static Problem DeserializeBson( string id ) {
+            return BsonSerializer.Deserialize<Problem>( Storage.GetDocument( id ) );
         }
     }
 }

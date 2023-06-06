@@ -1,4 +1,4 @@
-﻿using SimQCore.Library.testsGenerators;
+﻿using SimQCore.Library.TestsGenerators;
 using System;
 using System.Diagnostics;
 
