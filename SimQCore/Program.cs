@@ -10,15 +10,15 @@ namespace SimQCore {
         static void Main() {
             SimulationModeller SM = new();
 
-            initExampleProblems();
+            InitExampleProblems();
             SM.Simulate( examples [3] );
         }
 
         /** Коллекция задач-примеров. */
-        private static List<Problem> examples = new();
+        private static readonly List<Problem> examples = new();
 
         /** Метод инициализирует 4 задачи, используемые в качестве примеров. */
-        private static void initExampleProblems() {
+        private static void InitExampleProblems() {
 
             // Общие переменные.
             Dictionary<string, List<IModellingAgent>> linkList;
@@ -223,6 +223,35 @@ namespace SimQCore {
                 Agents = agentList,
                 Date = DateTime.Now,
                 Name = $"Example 4.",
+                Links = linkList
+            } );
+
+            //  ----------[[ Задача с бесконечным числом обработчиков ]]----------
+
+            source1 = new Source( new ExponentialDistribution( 0.2 ) );
+
+            serviceBlock1 = new InfServiceBlocks( new ExponentialDistribution( 0.5 ) );
+
+            sourcesLinks = new() {
+                serviceBlock1
+            };
+
+            linkList = new() {
+                {
+                    source1.Id,
+                    sourcesLinks
+                }
+            };
+
+            agentList = new() {
+                source1,
+                serviceBlock1
+            };
+
+            examples.Add( new() {
+                Agents = agentList,
+                Date = DateTime.Now,
+                Name = $"Example M/M/Inf/?.",
                 Links = linkList
             } );
         }

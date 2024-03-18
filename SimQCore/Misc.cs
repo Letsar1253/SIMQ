@@ -16,7 +16,7 @@ namespace SimQCore {
                     Console.ForegroundColor = ConsoleColor.Red;
                     break;
                 case LogStatus.INFO:
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.ForegroundColor = ConsoleColor.Gray;
                     break;
                 case LogStatus.WARNING:
                     Console.ForegroundColor = ConsoleColor.DarkYellow;

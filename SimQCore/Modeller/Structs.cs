@@ -1,7 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Attributes;
-using SimQCore.DataBase;
 using SimQCore.Modeller.BaseModels;
 using System;
 using System.Collections.Generic;
@@ -57,7 +56,7 @@ namespace SimQCore.Modeller {
         public Dictionary<string, List<IModellingAgent>> Links;
 
         public static Problem DeserializeBson( string id ) {
-            return BsonSerializer.Deserialize<Problem>( Storage.GetDocument( id ) );
+            return BsonSerializer.Deserialize<Problem>( Storage.Storage.GetDocument( id ) );
         }
     }
 }
