@@ -215,9 +215,7 @@ namespace SimQCore.Modeller.CustomModels {
         public QueueBuffer( int capacity = 0 ) : base() => _capacity = capacity;
         public override bool IsEmpty => _calls.Count == 0;
         public override bool IsFull => ( _capacity != 0 ) && ( _calls.Count >= _capacity );
-
         public override BaseCall PassCall() => IsEmpty ? null : _calls.Dequeue();
-
         public override bool TakeCall( BaseCall newCall ) {
             if( IsFull ) {
                 return false;
@@ -457,6 +455,16 @@ namespace SimQCore.Modeller.CustomModels {
     }
 
     internal class InfServiceBlocks: BaseServiceBlock {
+        [BsonElement]
+        private readonly IDistribution _distribution;
+        private readonly Func<IModellingAgent, List<IModellingAgent>, double, bool> EventAction = (Agent, Links, T) => {
+            throw new NotImplementedException();
+        };
+        public InfServiceBlocks( IDistribution distribution ) : base() {
+            _distribution = distribution;
+
+            Supervisor.AddAction( EventTag, EventAction );
+        }
         public override double NextEventTime => throw new NotImplementedException();
 
         public override string EventTag => "InfServiceBlocks";
