@@ -3,6 +3,7 @@ using SimQCore.Library.Distributions;
 using SimQCore.Modeller.BaseModels;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SimQCore.Modeller.CustomModels {
     internal class Source: BaseSource {
@@ -454,27 +455,60 @@ namespace SimQCore.Modeller.CustomModels {
         public override string EventTag => "Call";
     }
 
+    struct InfServiceBlockProcess {
+        public double processEndTime;
+        public BaseCall processCall;
+    }
+
     internal class InfServiceBlocks: BaseServiceBlock {
-        [BsonElement]
+        private readonly List<InfServiceBlockProcess> _processes = new ();
+        private readonly List<BaseBuffer> _bindedBuffers = new();
         private readonly IDistribution _distribution;
         private readonly Func<IModellingAgent, List<IModellingAgent>, double, bool> EventAction = (Agent, Links, T) => {
-            throw new NotImplementedException();
+            BaseCall call = Agent.DoEvent( T );
+            call.DoEvent( T );
+            return true;
         };
+
         public InfServiceBlocks( IDistribution distribution ) : base() {
             _distribution = distribution;
-
             Supervisor.AddAction( EventTag, EventAction );
         }
-        public override double NextEventTime => throw new NotImplementedException();
+        public override double NextEventTime => _processes.Count > 0
+            ? _processes.Min( service => service.processEndTime )
+            : double.PositiveInfinity;
+        public override string EventTag => GetType().Name;
+        public override BaseCall ProcessCall => _processes.Aggregate( ( selectedElem, nextElem ) =>
+            selectedElem.processEndTime > nextElem.processEndTime
+                ? nextElem : selectedElem
+        ).processCall;
+        public override void BindBuffer( BaseBuffer buffer ) => _bindedBuffers.Add( buffer );
+        public override BaseCall DoEvent( double T ) {
+            var finishingProcess = _processes.Aggregate( ( selectedElem, nextElem ) =>
+                selectedElem.processEndTime > nextElem.processEndTime
+                    ? nextElem : selectedElem
+            );
+            finishingProcess.processCall.DoEvent( T );
+            _processes.Remove( finishingProcess );
 
-        public override string EventTag => "InfServiceBlocks";
+            Misc.Log( $"\nМодельное время: {T}, агент: {Id}, заявка {finishingProcess.processCall.Id} обработана.", LogStatus.SUCCESS );
 
-        public override BaseCall ProcessCall => throw new NotImplementedException();
+            return finishingProcess.processCall;
+        }
+        public override bool IsActive() => true;
+        public override bool IsFree() => true;
+        public override bool TakeCall( BaseCall call, double T ) {
+            _processes.Add( new() {
+                processEndTime = T + _distribution.Generate(),
+                processCall = call
+            } );
+            return true;
+        }
 
-        public override void BindBuffer( BaseBuffer buffer ) => throw new NotImplementedException();
-        public override BaseCall DoEvent( double T ) => throw new NotImplementedException();
-        public override bool IsActive() => throw new NotImplementedException();
-        public override bool IsFree() => throw new NotImplementedException();
-        public override bool TakeCall( BaseCall call, double T ) => throw new NotImplementedException();
+        public void GetResults() {
+            // Todo
+            // Метод должен содержать логику по выводу всех результатов для конкретного агента этой модели
+            // по окончанию процесса моделирования. Метод будет дёргаться из StatisticCollector.
+        }
     }
 }

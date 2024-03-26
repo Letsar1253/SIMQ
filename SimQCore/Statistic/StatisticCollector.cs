@@ -210,6 +210,25 @@ namespace SimQCore.Statistic {
             }
         }
 
+        /** Метод формирует данные результатов моделирования и выводит их. */
+        public void CalcAndPrintAll() {
+            GetAverage();
+            GetCovariance();
+            GetHistogram( 10 );
+            GetEmpiricalDistribution();
+            GetVariance();
+
+            PrintAverage();
+            PrintCovariance();
+            PrintHistogram();
+            PrintEmpiricalDistribution();
+            PrintVariance();
+
+            // Todo 
+            // Каждый агент может предоставить собственный набор результатов
+            // Позволить StatisticCollector'у обратиться к каждому агенту для получения этих данных
+        }
+
         //public static string LoadResultToJson(string id)
         //{
         //    if (Storage.collection.CollectionNamespace.CollectionName != "Result") Storage.SetCurrentCollection("Result");

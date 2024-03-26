@@ -41,25 +41,7 @@ namespace SimQCore.Modeller {
 
             Misc.Log( "\nМоделирование окончено.", LogStatus.WARNING );
 
-            Misc.Log( $"\nСтатистика по результатам моделирования задачи \"{problem.Name}\":", LogStatus.INFO );
-
             data.GetAllCalls( problem.Agents );
-            //data.SaveStates();
-
-            StatisticCollector statistic = new(data);
-            statistic.GetAverage();
-            statistic.GetCovariance();
-            statistic.GetHistogram( 10 );
-            statistic.GetEmpiricalDistribution();
-            statistic.GetVariance();
-
-            statistic.PrintAverage();
-            statistic.PrintCovariance();
-            statistic.PrintHistogram();
-            statistic.PrintEmpiricalDistribution();
-            statistic.PrintVariance();
-
-            //statistic.SaveResult();
         }
     }
 }

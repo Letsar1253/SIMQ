@@ -2,23 +2,27 @@
 using SimQCore.Modeller;
 using SimQCore.Modeller.BaseModels;
 using SimQCore.Modeller.CustomModels;
+using SimQCore.Statistic;
 using System;
 using System.Collections.Generic;
 
 namespace SimQCore {
     class Program {
         static void Main() {
-            SimulationModeller SM = new();
+            Problem problem = InitRequestProblem(); // InitExampleProblems()[3]
 
-            InitExampleProblems();
-            SM.Simulate( examples [3] );
+            SimulationModeller modeller = new();
+            modeller.Simulate( problem );
+
+            Misc.Log( $"\nСтатистика по результатам моделирования задачи \"{problem.Name}\":", LogStatus.INFO );
+
+            StatisticCollector statistic = new(modeller.data);
+            statistic.CalcAndPrintAll();
         }
 
-        /** Коллекция задач-примеров. */
-        private static readonly List<Problem> examples = new();
-
         /** Метод инициализирует 4 задачи, используемые в качестве примеров. */
-        private static void InitExampleProblems() {
+        private static List<Problem> InitExampleProblems() {
+            List<Problem> examples = new();
 
             // Общие переменные.
             Dictionary<string, List<IModellingAgent>> linkList;
@@ -226,12 +230,17 @@ namespace SimQCore {
                 Links = linkList
             } );
 
-            //  ----------[[ Задача с бесконечным числом обработчиков ]]----------
+            return examples;
+        }
 
-            source1 = new Source( new ExponentialDistribution( 0.2 ) );
+        /** Метод инициализирует задачу с бесконечным числом обработчиков. */
+        private static Problem InitRequestProblem() {
+            Dictionary<string, List<IModellingAgent>> linkList;
+            List<IModellingAgent> agentList;
+            List<IModellingAgent> sourcesLinks;
 
-            serviceBlock1 = new InfServiceBlocks( new ExponentialDistribution( 0.5 ) );
-
+            var source1 = new Source( new ExponentialDistribution( 0.2 ) );
+            var serviceBlock1 = new InfServiceBlocks( new ExponentialDistribution( 0.5 ) );
             sourcesLinks = new() {
                 serviceBlock1
             };
@@ -248,12 +257,12 @@ namespace SimQCore {
                 serviceBlock1
             };
 
-            examples.Add( new() {
+            return new() {
                 Agents = agentList,
                 Date = DateTime.Now,
-                Name = $"Example M/M/Inf/?.",
+                Name = $"Example M/M/Inf/?",
                 Links = linkList
-            } );
+            };
         }
     }
 }
