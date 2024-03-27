@@ -3,6 +3,13 @@ using System.Collections.Generic;
 //using Newtonsoft.Json;
 
 namespace SimQCore.Statistic {
+
+    /** Интерфейс, реализуемый моделями агентов, позволяющий выводить их собственный набор результатов. */
+    interface IResultableModel {
+        /** Метод выводит результаты агента. */
+        public string GetResult();
+    }
+
     internal class StatisticCollector: DataCollector {
         public int[] average;
         public double[] variance;
@@ -137,7 +144,7 @@ namespace SimQCore.Statistic {
 
         public void PrintAverage() {
             Console.WriteLine();
-            if( average == null ) {
+            if( average == null || average.Length == 0 ) {
                 Console.WriteLine( "Средние значения не определены." );
             } else {
                 Console.WriteLine( "Средние значения:" );
@@ -151,7 +158,7 @@ namespace SimQCore.Statistic {
 
         public void PrintVariance() {
             Console.WriteLine();
-            if( variance == null ) {
+            if( variance == null || variance.Length == 0 ) {
                 Console.WriteLine( "Массив дисперсий не определён." );
             } else {
                 Console.WriteLine( "Дисперсии:" );
@@ -165,7 +172,7 @@ namespace SimQCore.Statistic {
 
         public void PrintHistogram() {
             Console.WriteLine();
-            if( hist == null ) {
+            if( hist == null || hist.Length == 0 ) {
                 Console.WriteLine( "Данные для гистограммы не определены." );
             } else {
                 Console.WriteLine( "Гистограмма:" );
@@ -181,7 +188,7 @@ namespace SimQCore.Statistic {
 
         public void PrintCovariance() {
             Console.WriteLine();
-            if( cov == null ) {
+            if( cov == null || cov.Length == 0 ) {
                 Console.WriteLine( "Ковариационная матрица не определена." );
             } else {
                 Console.WriteLine( "Ковариационная матрица:" );
@@ -197,7 +204,7 @@ namespace SimQCore.Statistic {
 
         public void PrintEmpiricalDistribution() {
             Console.WriteLine();
-            if( empDist == null ) {
+            if( empDist == null || empDist.Length == 0 ) {
                 Console.WriteLine( "Данные эмпирической функции распределения не определены." );
             } else {
                 Console.WriteLine( "Данные эмпирической функции распределения:" );
@@ -208,6 +215,12 @@ namespace SimQCore.Statistic {
                     Console.WriteLine();
                 }
             }
+        }
+
+        public void PrintAgentsResults() {
+            // Todo 
+            // Каждый агент может предоставить собственный набор результатов
+            // Позволить StatisticCollector'у обратиться к каждому агенту для получения этих данных
         }
 
         /** Метод формирует данные результатов моделирования и выводит их. */
@@ -224,9 +237,7 @@ namespace SimQCore.Statistic {
             PrintEmpiricalDistribution();
             PrintVariance();
 
-            // Todo 
-            // Каждый агент может предоставить собственный набор результатов
-            // Позволить StatisticCollector'у обратиться к каждому агенту для получения этих данных
+            PrintAgentsResults();
         }
 
         //public static string LoadResultToJson(string id)
