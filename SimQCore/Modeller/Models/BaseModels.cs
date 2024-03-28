@@ -1,4 +1,4 @@
-﻿namespace SimQCore.Modeller.BaseModels {
+﻿namespace SimQCore.Modeller.Models {
 
     enum AgentType {
         SOURCE,         // Источник входящих заявок

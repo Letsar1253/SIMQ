@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SimQCore.Modeller;
+using SimQCore.Modeller.Models;
+using System;
 using System.Collections.Generic;
 //using Newtonsoft.Json;
 
@@ -11,19 +13,23 @@ namespace SimQCore.Statistic {
     }
 
     internal class StatisticCollector: DataCollector {
+        private List<IModellingAgent> agents;
+
         public int[] average;
         public double[] variance;
         public int[][] hist;
         public double[][] cov;
         public double[][] empDist;
 
-        public StatisticCollector( DataCollector data ) {
+        public StatisticCollector( SimulationModeller modeller ) {
             _id = Guid.NewGuid().ToString( "N" );
             Date = DateTime.Now;
-            totalTime = data.totalTime;
-            totalCalls = data.totalCalls;
-            totalStates = data.totalStates;
-            states = data.states;
+ 
+            totalTime = modeller.data.totalTime;
+            totalCalls = modeller.data.totalCalls;
+            totalStates = modeller.data.totalStates;
+            states = modeller.data.states;
+            agents = modeller.problem.Agents;
         }
 
         public static int [] GetMaxCallArray( List<int> [] st, int total ) {
@@ -180,7 +186,6 @@ namespace SimQCore.Statistic {
                     for( int j = 0; j < hist [i].Length; j++ ) {
                         Console.Write( hist [i] [j] + " " );
                     }
-
                     Console.WriteLine();
                 }
             }
@@ -196,7 +201,6 @@ namespace SimQCore.Statistic {
                     for( int j = 0; j < cov [i].Length; j++ ) {
                         Console.Write( string.Format( "{0:0.00000} ", cov[i][j] ) );
                     }
-
                     Console.WriteLine();
                 }
             }
@@ -217,10 +221,14 @@ namespace SimQCore.Statistic {
             }
         }
 
+        /** Метод выводит собственные результаты каждого агента. */
         public void PrintAgentsResults() {
-            // Todo 
-            // Каждый агент может предоставить собственный набор результатов
-            // Позволить StatisticCollector'у обратиться к каждому агенту для получения этих данных
+            foreach( IModellingAgent item in agents ) {
+                if( item is IResultableModel ) {
+                    Misc.Log( $"\nРезультаты агента {item.Id}:" );
+                    Misc.Log( ( item as IResultableModel ).GetResult() );
+                }
+            }
         }
 
         /** Метод формирует данные результатов моделирования и выводит их. */

@@ -1,7 +1,8 @@
 ﻿using SimQCore.Library.Distributions;
 using SimQCore.Modeller;
-using SimQCore.Modeller.BaseModels;
-using SimQCore.Modeller.CustomModels;
+using SimQCore.Modeller.Models;
+using SimQCore.Modeller.Models.Common;
+using SimQCore.Modeller.Models.UserModels;
 using SimQCore.Statistic;
 using System;
 using System.Collections.Generic;
@@ -14,9 +15,9 @@ namespace SimQCore {
             SimulationModeller modeller = new();
             modeller.Simulate( problem );
 
-            Misc.Log( $"\nСтатистика по результатам моделирования задачи \"{problem.Name}\":", LogStatus.INFO );
+            Misc.Log( $"\nСтатистика по результатам моделирования задачи \"{problem.Name}\":" );
 
-            StatisticCollector statistic = new(modeller.data);
+            StatisticCollector statistic = new(modeller);
             statistic.CalcAndPrintAll();
         }
 

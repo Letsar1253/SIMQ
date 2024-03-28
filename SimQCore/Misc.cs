@@ -10,7 +10,7 @@ namespace SimQCore {
     }
 
     public static class Misc {
-        public static void Log( string message, LogStatus status ) {
+        public static void Log( string message, LogStatus status = LogStatus.INFO ) {
             switch( status ) {
                 case LogStatus.ERROR:
                     Console.ForegroundColor = ConsoleColor.Red;

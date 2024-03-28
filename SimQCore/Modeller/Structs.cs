@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Attributes;
-using SimQCore.Modeller.BaseModels;
+using SimQCore.Modeller.Models;
 using System;
 using System.Collections.Generic;
 

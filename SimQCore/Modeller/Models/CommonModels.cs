@@ -1,10 +1,9 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using SimQCore.Library.Distributions;
-using SimQCore.Modeller.BaseModels;
 using System;
 using System.Collections.Generic;
 
-namespace SimQCore.Modeller.CustomModels {
+namespace SimQCore.Modeller.Models.Common {
     internal class Source: BaseSource {
         [BsonElement]
         private readonly IDistribution _distribution;
@@ -38,7 +37,7 @@ namespace SimQCore.Modeller.CustomModels {
             foreach( IModellingAgent orbit in Links ) {
                 if( orbit.Type == AgentType.ORBIT ) {
                     if ( ( ( BaseOrbit )orbit ).TakeCall( call, T ) ) {
-                        Misc.Log( $"Заявка отправлена на орбиту { orbit.Id }.", LogStatus.INFO );
+                        Misc.Log( $"Заявка отправлена на орбиту { orbit.Id }." );
                         return true;
                     }
                 }
@@ -120,7 +119,7 @@ namespace SimQCore.Modeller.CustomModels {
         public override void BindBuffer( BaseBuffer buffer ) => _bindedBuffers.Add( buffer );
 
         private bool AcceptCall( BaseCall call, double T ) {
-            Misc.Log( $"Заявка {call.Id} принята в обработку устройством {Id}.", LogStatus.INFO );
+            Misc.Log( $"Заявка {call.Id} принята в обработку устройством {Id}." );
             _processCall = call;
             _delta = gS( T );
             return true;
@@ -166,7 +165,7 @@ namespace SimQCore.Modeller.CustomModels {
         private bool SendToBuffer( BaseCall call, double _ ) {
             foreach( BaseBuffer buffer in _bindedBuffers ) {
                 if( buffer.TakeCall( call ) ) {
-                    Misc.Log( $"Заявка {call.Id} попала в буфер {buffer.Id}.", LogStatus.INFO );
+                    Misc.Log( $"Заявка {call.Id} попала в буфер {buffer.Id}." );
                     return true;
                 }
             }
@@ -328,7 +327,7 @@ namespace SimQCore.Modeller.CustomModels {
         public override void BindBuffer( BaseBuffer buffer ) => _bindedBuffers.Add( buffer );
 
         private bool AcceptCall( BaseCall call, double T ) {
-            Misc.Log( $"Заявка {call.Id} принята в обработку устройством {Id}.", LogStatus.INFO );
+            Misc.Log( $"Заявка {call.Id} принята в обработку устройством {Id}." );
             _processCall = call;
             _delta = gS( T );
             return true;
@@ -380,7 +379,7 @@ namespace SimQCore.Modeller.CustomModels {
         private bool SendToBuffer( BaseCall call, double _ ) {
             foreach( BaseBuffer buffer in _bindedBuffers ) {
                 if( buffer.TakeCall( call ) ) {
-                    Misc.Log( $"Заявка {call.Id} попала в буфер {buffer.Id}.", LogStatus.INFO );
+                    Misc.Log( $"Заявка {call.Id} попала в буфер {buffer.Id}." );
                     return true;
                 }
             }
@@ -428,7 +427,7 @@ namespace SimQCore.Modeller.CustomModels {
             Misc.Log( $"\nМодельное время: {T}, агент: {Id}, заявка {call.Id} поступила.", LogStatus.SUCCESS );
 
             isBlocked = true;
-            Misc.Log( $"Входящий поток {Id} заблокирован.", LogStatus.INFO );
+            Misc.Log( $"Входящий поток {Id} заблокирован." );
 
             return call;
         }

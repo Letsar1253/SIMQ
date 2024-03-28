@@ -9,7 +9,15 @@ namespace SimQCore.Modeller {
         /// <returns>True - в случае, если моделирование окончено, иначе false.</returns>
         private bool IsDone( double t ) => t >= MaxModelationTime;
 
+        /// <summary>
+        /// Экземпляр сборщика результатов.
+        /// </summary>
         public DataCollector data;
+
+        /// <summary>
+        /// Моделируемая задача.
+        /// </summary>
+        public Problem problem;
 
         /// <summary>
         /// Максимальное время моделирования. По умолчанию - 30.
@@ -17,6 +25,8 @@ namespace SimQCore.Modeller {
         public double MaxModelationTime = 30;
 
         public void Simulate( Problem problem ) {
+            this.problem = problem;
+
             MaxModelationTime = problem.MaxModelationTime ?? MaxModelationTime;
 
             Supervisor supervisor = new();
