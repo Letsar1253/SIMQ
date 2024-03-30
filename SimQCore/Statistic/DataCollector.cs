@@ -35,10 +35,10 @@ namespace SimQCore.Statistic {
             int i = 0;
             foreach( IModellingAgent agent in agents ) {
                 if( agent.Type == AgentType.BUFFER ) {
-                    states [i].Add( ( ( BaseBuffer )agent ).CurrentSize );
+                    states [i].Add( ( agent as BaseBuffer ).CurrentSize );
                     i++;
                 } else if( agent.Type == AgentType.ORBIT ) {
-                    states [i].Add( ( ( BaseOrbit )agent ).CurrentSize );
+                    states [i].Add( ( agent as BaseOrbit ).CurrentSize );
                     i++;
                 }
             }

@@ -114,7 +114,7 @@ namespace SimQCore.Modeller.Models.Common {
 
         public override BaseCall ProcessCall => _processCall;
         public override bool IsFree() => _processCall == null;
-        public override string EventTag => "ServiceBlock";
+        public override string EventTag => GetType().Name;
         public override double NextEventTime => _delta;
         public override void BindBuffer( BaseBuffer buffer ) => _bindedBuffers.Add( buffer );
 
@@ -201,7 +201,7 @@ namespace SimQCore.Modeller.Models.Common {
         public override BaseCall DoEvent( double T ) => null;
         public override bool IsActive() => false;
         public override double NextEventTime => double.PositiveInfinity;
-        public override string EventTag => "StackBuffer";
+        public override string EventTag => GetType().Name;
         public override int CurrentSize => _calls.Count;
     }
 
@@ -227,7 +227,7 @@ namespace SimQCore.Modeller.Models.Common {
         public override BaseCall DoEvent( double T ) => null;
         public override bool IsActive() => false;
         public override double NextEventTime => double.PositiveInfinity;
-        public override string EventTag => "QueueBuffer";
+        public override string EventTag => GetType().Name;
         public override int CurrentSize => _calls.Count;
     }
 
@@ -235,7 +235,7 @@ namespace SimQCore.Modeller.Models.Common {
         public override BaseCall DoEvent( double T ) => this;
         public override bool IsActive() => false;
         public override double NextEventTime => double.PositiveInfinity;
-        public override string EventTag => "Call";
+        public override string EventTag => GetType().Name;
     }
 
     internal class Orbit: BaseOrbit {
@@ -266,7 +266,7 @@ namespace SimQCore.Modeller.Models.Common {
             Supervisor.AddAction( EventTag, EventAction );
         }
         public override double NextEventTime => _teta;
-        public override string EventTag => "Orbit";
+        public override string EventTag => GetType().Name;
         public override BaseCall DoEvent( double T ) {
             BaseCall call = _calls.Dequeue();
             CalcNextEventTime( T );
@@ -322,7 +322,7 @@ namespace SimQCore.Modeller.Models.Common {
 
         public override BaseCall ProcessCall => _processCall;
         public override bool IsFree() => _processCall == null;
-        public override string EventTag => "PollingServiceBlock";
+        public override string EventTag => GetType().Name;
         public override double NextEventTime => Math.Min( _delta, _nextPollingBufferDelta );
         public override void BindBuffer( BaseBuffer buffer ) => _bindedBuffers.Add( buffer );
 
@@ -433,7 +433,7 @@ namespace SimQCore.Modeller.Models.Common {
         }
 
         public FiniteSource( IDistribution distribution ) : base( distribution ) { }
-        public override string EventTag => "FiniteSource";
+        public override string EventTag => GetType().Name;
 
         public override double NextEventTime => isBlocked ? double.PositiveInfinity : _tau;
     }

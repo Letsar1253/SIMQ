@@ -235,13 +235,13 @@ namespace SimQCore.Statistic {
         public void CalcAndPrintAll() {
             GetAverage();
             GetCovariance();
-            GetHistogram( 10 );
+            // GetHistogram( 10 );
             GetEmpiricalDistribution();
             GetVariance();
 
             PrintAverage();
             PrintCovariance();
-            PrintHistogram();
+            // PrintHistogram();
             PrintEmpiricalDistribution();
             PrintVariance();
 

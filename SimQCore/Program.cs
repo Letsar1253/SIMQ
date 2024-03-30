@@ -5,12 +5,17 @@ using SimQCore.Modeller.Models.Common;
 using SimQCore.Modeller.Models.UserModels;
 using SimQCore.Statistic;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace SimQCore {
     class Program {
         static void Main() {
-            Problem problem = InitRequestProblem(); // InitExampleProblems()[3]
+
+            // Задачи упомянутые в ВКР - InitExampleProblems()[Номер_задачи]
+            // Задача с бесконечным блоком приборов - InitInfServiceBlockProblem()
+            // Задача с конечным блоком приборов - InitFinServiceBlockProblem()
+            Problem problem = InitFinServiceBlockProblem(); 
 
             SimulationModeller modeller = new();
             modeller.Simulate( problem );
@@ -21,7 +26,7 @@ namespace SimQCore {
             statistic.CalcAndPrintAll();
         }
 
-        /** Метод инициализирует 4 задачи, используемые в качестве примеров. */
+        /** Метод инициализирует 4 задачи, используемые в качестве примеров в ВКР. */
         private static List<Problem> InitExampleProblems() {
             List<Problem> examples = new();
 
@@ -235,34 +240,70 @@ namespace SimQCore {
         }
 
         /** Метод инициализирует задачу с бесконечным числом обработчиков. */
-        private static Problem InitRequestProblem() {
+        private static Problem InitInfServiceBlockProblem() {
             Dictionary<string, List<IModellingAgent>> linkList;
             List<IModellingAgent> agentList;
             List<IModellingAgent> sourcesLinks;
 
-            var source1 = new Source( new ExponentialDistribution( 0.2 ) );
-            var serviceBlock1 = new InfServiceBlocks( new ExponentialDistribution( 0.5 ) );
-            sourcesLinks = new() {
-                serviceBlock1
-            };
+            var source = new Source( new ExponentialDistribution( 0.2 ) );
+            var serviceBlock = new InfServiceBlocks( new ExponentialDistribution( 0.5 ) );
 
             linkList = new() {
                 {
-                    source1.Id,
-                    sourcesLinks
+                    source.Id,
+                    new() {
+                        serviceBlock
+                    }
                 }
             };
 
             agentList = new() {
-                source1,
-                serviceBlock1
+                source,
+                serviceBlock
             };
 
             return new() {
                 Agents = agentList,
                 Date = DateTime.Now,
                 Name = $"Example M/M/Inf/?",
-                Links = linkList
+                Links = linkList,
+                MaxModelationTime = 100
+            };
+        }
+
+        /** Метод инициализирует задачу с конечным числом обработчиков. */
+        private static Problem InitFinServiceBlockProblem() {
+            Dictionary<string, List<IModellingAgent>> linkList;
+            List<IModellingAgent> agentList;
+            List<IModellingAgent> sourcesLinks;
+
+            var queue = new QueueBuffer( 5 );
+            var source = new Source( new ExponentialDistribution( 0.2 ) );
+            var serviceBlock = new FinServiceBlocks( 5, new ExponentialDistribution( 0.5 ) );
+
+            serviceBlock.BindBuffer( queue );
+
+            linkList = new() {
+                {
+                    source.Id,
+                    new() {
+                        serviceBlock
+                    }
+                }
+            };
+
+            agentList = new() {
+                source,
+                queue,
+                serviceBlock
+            };
+
+            return new() {
+                Agents = agentList,
+                Date = DateTime.Now,
+                Name = $"Example M/M/Inf/?",
+                Links = linkList,
+                MaxModelationTime = 100
             };
         }
     }
