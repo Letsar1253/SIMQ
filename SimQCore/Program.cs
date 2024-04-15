@@ -243,7 +243,6 @@ namespace SimQCore {
         private static Problem InitInfServiceBlockProblem() {
             Dictionary<string, List<IModellingAgent>> linkList;
             List<IModellingAgent> agentList;
-            List<IModellingAgent> sourcesLinks;
 
             var source = new Source( new ExponentialDistribution( 0.2 ) );
             var serviceBlock = new InfServiceBlocks( new ExponentialDistribution( 0.5 ) );
@@ -275,7 +274,6 @@ namespace SimQCore {
         private static Problem InitFinServiceBlockProblem() {
             Dictionary<string, List<IModellingAgent>> linkList;
             List<IModellingAgent> agentList;
-            List<IModellingAgent> sourcesLinks;
 
             var queue = new QueueBuffer( 5 );
             var source = new Source( new ExponentialDistribution( 0.2 ) );

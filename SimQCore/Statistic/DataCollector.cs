@@ -4,6 +4,11 @@ using System.Collections.Generic;
 //using Newtonsoft.Json;
 
 namespace SimQCore.Statistic {
+    public interface IAgentStatistic {
+        /** Метод возвращает текущее состояние агента моделирования. */
+        public int GetCurrentState();
+    }
+
     class DataCollector {
         public string _id = Guid.NewGuid().ToString("N");
         public DateTime Date = DateTime.Now;
@@ -17,7 +22,7 @@ namespace SimQCore.Statistic {
         public void SetupStates( List<IModellingAgent> agents ) {
             int bufferCount = 0;
             foreach( IModellingAgent agent in agents ) {
-                if( agent.Type == AgentType.BUFFER || agent.Type == AgentType.ORBIT ) {
+                if( agent is IAgentStatistic ) {
                     bufferCount++;
                 }
             }
@@ -25,7 +30,7 @@ namespace SimQCore.Statistic {
             states = new List<int> [bufferCount];
 
             for( int i = 0; i < states.Length; i++ ) {
-                states [i] = new List<int>();
+                states[i] = [];
             }
         }
 
@@ -34,11 +39,8 @@ namespace SimQCore.Statistic {
             totalStates++;
             int i = 0;
             foreach( IModellingAgent agent in agents ) {
-                if( agent.Type == AgentType.BUFFER ) {
-                    states [i].Add( ( agent as BaseBuffer ).CurrentSize );
-                    i++;
-                } else if( agent.Type == AgentType.ORBIT ) {
-                    states [i].Add( ( agent as BaseOrbit ).CurrentSize );
+                if( agent is IAgentStatistic ) {
+                    states[i].Add( ( agent as IAgentStatistic ).GetCurrentState() );
                     i++;
                 }
             }

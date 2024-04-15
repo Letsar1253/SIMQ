@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using SimQCore.Library.Distributions;
+using SimQCore.Statistic;
 using System;
 using System.Collections.Generic;
 
@@ -178,7 +179,7 @@ namespace SimQCore.Modeller.Models.Common {
         public override bool IsActive() => true;
     }
 
-    internal class StackBuffer: BaseBuffer {
+    internal class StackBuffer: BaseBuffer, IAgentStatistic {
         private int _capacity = 0;
 
         [BsonElement]
@@ -203,9 +204,11 @@ namespace SimQCore.Modeller.Models.Common {
         public override double NextEventTime => double.PositiveInfinity;
         public override string EventTag => GetType().Name;
         public override int CurrentSize => _calls.Count;
+        /** Текущим состоянием является количество заявок в буфере в момент обращения к агенту. */
+        public int GetCurrentState() => CurrentSize;
     }
 
-    internal class QueueBuffer: BaseBuffer {
+    internal class QueueBuffer: BaseBuffer, IAgentStatistic {
         private int _capacity = 0;
 
         [BsonElement]
@@ -229,6 +232,8 @@ namespace SimQCore.Modeller.Models.Common {
         public override double NextEventTime => double.PositiveInfinity;
         public override string EventTag => GetType().Name;
         public override int CurrentSize => _calls.Count;
+        /** Текущим состоянием является количество заявок в буфере в момент обращения к агенту. */
+        public int GetCurrentState() => CurrentSize;
     }
 
     internal class Call: BaseCall {

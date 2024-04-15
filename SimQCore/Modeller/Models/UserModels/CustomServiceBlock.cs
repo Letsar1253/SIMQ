@@ -1,5 +1,4 @@
 ﻿using SimQCore.Library.Distributions;
-using SimQCore.Modeller.Models.Common;
 using SimQCore.Statistic;
 using System;
 using System.Collections.Generic;
@@ -22,7 +21,8 @@ namespace SimQCore.Modeller.Models.UserModels {
         public BaseCall processCall { get; set; }
     }
 
-    internal class InfServiceBlocks: BaseServiceBlock, IResultableModel {
+    /** Класс представляет блок с неограниченным количеством приборов. */
+    internal class InfServiceBlocks: BaseServiceBlock, IResultableModel, IAgentStatistic {
         private readonly List<ServiceBlockState> _serviceBlockStates = new();
         private readonly List<ServiceBlockProcess> _processes = new();
         private readonly List<BaseBuffer> _bindedBuffers = new();
@@ -87,12 +87,16 @@ namespace SimQCore.Modeller.Models.UserModels {
             );
             return result;
         }
+
+        /** Состоянием является количество заявок, обрабатывающихся в момент обращения к агенту. */
+        public int GetCurrentState() => _processes.Count;
     }
 
-    internal class FinServiceBlocks: BaseServiceBlock, IResultableModel {
+    /** Класс представляет блок с ограниченным количеством приборов (задаётся в конструкторе). */
+    internal class FinServiceBlocks: BaseServiceBlock, IResultableModel, IAgentStatistic {
         private readonly List<ServiceBlockState> _serviceBlockStates = new();
-        private readonly List<ServiceBlockProcess> _processes = new();
-        private readonly List<BaseBuffer> _bindedBuffers = new();
+        private readonly List<ServiceBlockProcess> _processes = [];
+        private readonly List<BaseBuffer> _bindedBuffers = [];
         private readonly IDistribution _distribution;
         private ServiceBlockProcess neareastProcess => _processes.Aggregate( ( selectedElem, nextElem ) =>
             double.IsPositiveInfinity( selectedElem.processEndTime )
@@ -181,5 +185,10 @@ namespace SimQCore.Modeller.Models.UserModels {
             );
             return result;
         }
+
+        /** Состоянием является количество заявок, обрабатывающихся в момент обращения к агенту. */
+        // В учёт не берутся заявки, хранящиеся в буферах, связанных с данным агентом.
+        // Если необходим и их учёт, заменить на использование поля actualCallsAmount.
+        public int GetCurrentState() => _processes.FindAll( p => p.processCall != null ).Count;
     }
 }
