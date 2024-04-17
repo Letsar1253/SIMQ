@@ -264,7 +264,7 @@ namespace SimQCore {
             return new() {
                 Agents = agentList,
                 Date = DateTime.Now,
-                Name = $"Example M/M/Inf/?",
+                Name = $"Example M/M/Inf",
                 Links = linkList,
                 MaxModelationTime = 100
             };
@@ -275,9 +275,9 @@ namespace SimQCore {
             Dictionary<string, List<IModellingAgent>> linkList;
             List<IModellingAgent> agentList;
 
-            var queue = new QueueBuffer( 5 );
-            var source = new Source( new ExponentialDistribution( 0.2 ) );
-            var serviceBlock = new FinServiceBlocks( 5, new ExponentialDistribution( 0.5 ) );
+            var queue = new QueueBuffer( 0 );
+            var source = new Source( new ExponentialDistribution( 1.0 ) );
+            var serviceBlock = new FinServiceBlocks( 1, new ExponentialDistribution( 2.0 ) );
 
             serviceBlock.BindBuffer( queue );
 
@@ -299,9 +299,9 @@ namespace SimQCore {
             return new() {
                 Agents = agentList,
                 Date = DateTime.Now,
-                Name = $"Example M/M/Inf/?",
+                Name = $"Example M/M/n/c",
                 Links = linkList,
-                MaxModelationTime = 100
+                MaxModelationTime = 10000
             };
         }
     }

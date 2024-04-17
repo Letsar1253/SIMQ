@@ -189,6 +189,6 @@ namespace SimQCore.Modeller.Models.UserModels {
         /** Состоянием является количество заявок, обрабатывающихся в момент обращения к агенту. */
         // В учёт не берутся заявки, хранящиеся в буферах, связанных с данным агентом.
         // Если необходим и их учёт, заменить на использование поля actualCallsAmount.
-        public int GetCurrentState() => _processes.FindAll( p => p.processCall != null ).Count;
+        public int GetCurrentState() => actualCallsAmount;// _processes.FindAll( p => p.processCall != null ).Count;
     }
 }

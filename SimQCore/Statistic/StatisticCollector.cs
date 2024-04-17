@@ -2,6 +2,7 @@
 using SimQCore.Modeller.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 //using Newtonsoft.Json;
 
 namespace SimQCore.Statistic {
@@ -15,24 +16,33 @@ namespace SimQCore.Statistic {
     internal class StatisticCollector: DataCollector {
         private List<IModellingAgent> agents;
 
-        public int[] average;
-        public double[] variance;
+        public Dictionary<IModellingAgent, double> average;
+        public Dictionary<IModellingAgent, double> variance;
         public int[][] hist;
         public double[][] cov;
-        public double[][] empDist;
+        public Dictionary<IModellingAgent, Dictionary<int, double>> empDist { get => states; }
 
         public StatisticCollector( SimulationModeller modeller ) {
             _id = Guid.NewGuid().ToString( "N" );
             Date = DateTime.Now;
  
             totalTime = modeller.data.totalTime;
-            totalCalls = modeller.data.totalCalls;
-            totalStates = modeller.data.totalStates;
+            totalCalls = modeller.data.totalCalls; // зачем?
+            //totalStates = modeller.data.totalStates;
             states = modeller.data.states;
             agents = modeller.problem.Agents;
+            NormalizeProbabilities();
         }
 
-        public static int [] GetMaxCallArray( List<int> [] st, int total ) {
+        private void NormalizeProbabilities()
+        {
+            foreach (IModellingAgent agent in states.Keys)
+                foreach (int i in states[agent].Keys)
+                    states[agent][i] /= totalTime;
+        }
+
+        // скорее всего, не нужен
+        /*public static int [] GetMaxCallArray( List<int> [] st, int total ) {
             int[] maxCallArray = new int[st.Length];
             int maxCall;
             for( int i = 0; i < st.Length; i++ ) {
@@ -45,21 +55,17 @@ namespace SimQCore.Statistic {
                 maxCallArray [i] = maxCall;
             }
             return maxCallArray;
-        }
+        }*/
 
         public void GetAverage() {
-            int sum;
-            average = new int [states.Length];
-            for( int i = 0; i < states.Length; i++ ) {
-                sum = 0;
-                foreach( int el in states [i] ) {
-                    sum += el;
-                }
-                average [i] = sum / totalStates;
+            average = new ();
+            foreach(IModellingAgent agent in states.Keys) { 
+                average.Add(agent, states[agent].Average(s => s.Key * s.Value));
             }
         }
 
-        public void GetCovariance() {
+        // потом исправить
+        /*public void GetCovariance() {
             if( average == null ) {
                 GetAverage();
             }
@@ -82,9 +88,10 @@ namespace SimQCore.Statistic {
                     cov [j] [i] = cov [i] [j];
                 }
             }
-        }
+        }*/
 
-        public void GetHistogram( int bins ) {
+        // скорее всего, не нужен
+        /*public void GetHistogram( int bins ) {
             int[] binsArray = new int[states.Length];
             int[] maxCallArray = GetMaxCallArray(states, totalStates);
             for( int i = 0; i < maxCallArray.Length; i++ ) {
@@ -111,9 +118,10 @@ namespace SimQCore.Statistic {
                     hist [i] [stepCount]++;
                 }
             }
-        }
+        }*/
 
-        public void GetEmpiricalDistribution() {
+        // скорее всего, не нужен
+        /*public void GetEmpiricalDistribution() {
             int[] maxCallArray = GetMaxCallArray(states, totalStates);
 
             double sum;
@@ -130,9 +138,10 @@ namespace SimQCore.Statistic {
                     empDist [i] [j] = sum / totalStates;
                 }
             }
-        }
+        }*/
 
-        public void GetVariance() {
+        // потом доделать
+        /*public void GetVariance() {
             if( average == null ) {
                 GetAverage();
             }
@@ -146,23 +155,23 @@ namespace SimQCore.Statistic {
                 }
                 variance [i] = sum / ( totalStates - 1 );
             }
-        }
+        }*/
 
         public void PrintAverage() {
             Console.WriteLine();
-            if( average == null || average.Length == 0 ) {
+            if( average == null || average.Count == 0 ) {
                 Console.WriteLine( "Средние значения не определены." );
             } else {
                 Console.WriteLine( "Средние значения:" );
-                for( int i = 0; i < average.Length; i++ ) {
-                    Console.Write( average [i] + " " );
+                foreach(IModellingAgent agent in average.Keys) {
+                    Console.WriteLine($"{agent.Id}: {average[agent]}");
                 }
-
                 Console.WriteLine();
             }
         }
 
-        public void PrintVariance() {
+        // потом
+        /*public void PrintVariance() {
             Console.WriteLine();
             if( variance == null || variance.Length == 0 ) {
                 Console.WriteLine( "Массив дисперсий не определён." );
@@ -174,9 +183,10 @@ namespace SimQCore.Statistic {
 
                 Console.WriteLine();
             }
-        }
+        }*/
 
-        public void PrintHistogram() {
+        // не надо?
+        /*public void PrintHistogram() {
             Console.WriteLine();
             if( hist == null || hist.Length == 0 ) {
                 Console.WriteLine( "Данные для гистограммы не определены." );
@@ -189,7 +199,7 @@ namespace SimQCore.Statistic {
                     Console.WriteLine();
                 }
             }
-        }
+        }*/
 
         public void PrintCovariance() {
             Console.WriteLine();
@@ -201,22 +211,20 @@ namespace SimQCore.Statistic {
                     for( int j = 0; j < cov [i].Length; j++ ) {
                         Console.Write( string.Format( "{0:0.00000} ", cov[i][j] ) );
                     }
-                    Console.WriteLine();
                 }
             }
         }
 
         public void PrintEmpiricalDistribution() {
             Console.WriteLine();
-            if( empDist == null || empDist.Length == 0 ) {
+            if( empDist == null || empDist.Count == 0 ) {
                 Console.WriteLine( "Данные эмпирической функции распределения не определены." );
             } else {
-                Console.WriteLine( "Данные эмпирической функции распределения:" );
-                for( int i = 0; i < empDist.Length; i++ ) {
-                    for( int j = 0; j < empDist [i].Length; j++ ) {
-                        Console.Write( string.Format("{0:0.00000} ", empDist[i][j]) );
-                    }
-                    Console.WriteLine();
+                foreach (IModellingAgent agent in empDist.Keys)
+                {
+                    Console.WriteLine($"Данные эмпирической функции распределения {agent.Id}:");
+                    foreach(int i in empDist[agent].Keys)
+                        Console.WriteLine(string.Format("{0} {1:0.00000} ", i, empDist[agent][i]));
                 }
             }
         }
@@ -234,18 +242,18 @@ namespace SimQCore.Statistic {
         /** Метод формирует данные результатов моделирования и выводит их. */
         public void CalcAndPrintAll() {
             GetAverage();
-            GetCovariance();
+            //GetCovariance();
             // GetHistogram( 10 );
-            GetEmpiricalDistribution();
-            GetVariance();
+            //GetEmpiricalDistribution();
+            //GetVariance();
 
             PrintAverage();
             PrintCovariance();
             // PrintHistogram();
             PrintEmpiricalDistribution();
-            PrintVariance();
+            //PrintVariance();
 
-            PrintAgentsResults();
+            //PrintAgentsResults();
         }
 
         //public static string LoadResultToJson(string id)

@@ -16,32 +16,25 @@ namespace SimQCore.Statistic {
 
         public double totalTime = 0;
         public int totalCalls = 0;
-        public int totalStates = 0;
-        public List<int>[] states;
+        //public int totalStates = 0;
+        public Dictionary<IModellingAgent,Dictionary<int,double>> states = [];
 
         public void SetupStates( List<IModellingAgent> agents ) {
-            int bufferCount = 0;
             foreach( IModellingAgent agent in agents ) {
                 if( agent is IAgentStatistic ) {
-                    bufferCount++;
+                    states.Add( agent, [] );
                 }
-            }
-
-            states = new List<int> [bufferCount];
-
-            for( int i = 0; i < states.Length; i++ ) {
-                states[i] = [];
             }
         }
 
         public void AddState( double deltaT, List<IModellingAgent> agents ) {
             totalTime += deltaT;
-            totalStates++;
-            int i = 0;
+            //totalStates++;
             foreach( IModellingAgent agent in agents ) {
-                if( agent is IAgentStatistic ) {
-                    states[i].Add( ( agent as IAgentStatistic ).GetCurrentState() );
-                    i++;
+                if( states.ContainsKey(agent) ) {
+                    var current_state = (agent as IAgentStatistic).GetCurrentState();
+                    if (states[agent].ContainsKey(current_state)) states[agent][current_state] += deltaT; 
+                    else states[agent].Add(current_state, deltaT);
                 }
             }
         }

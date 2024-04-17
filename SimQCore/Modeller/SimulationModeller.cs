@@ -41,11 +41,10 @@ namespace SimQCore.Modeller {
             while( !IsDone( T ) ) {
                 Event nextEvent = supervisor.GetNextEvent();
 
-                T = nextEvent.ModelTimeStamp;
-
                 // В данном сегменте кода должен проходить сбор статистических данных.
                 data.AddState( nextEvent.ModelTimeStamp - T, problem.Agents );
 
+                T = nextEvent.ModelTimeStamp;
                 supervisor.FireEvent( nextEvent );
             }
 

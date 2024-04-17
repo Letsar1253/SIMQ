@@ -25,7 +25,7 @@ namespace SimQCore {
                     Console.ForegroundColor = ConsoleColor.Green;
                     break;
             }
-            Console.WriteLine( message );
+            //Console.WriteLine( message );
             Console.ForegroundColor = ConsoleColor.White;
         }
     }
