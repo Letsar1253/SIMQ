@@ -108,6 +108,19 @@ namespace SimQCore.Modeller.Models.UserModels {
         private int actualCallsAmount =>
             _processes.FindAll( p => p.processCall != null ).Count
                 + _bindedBuffers.Sum( buffer => buffer.CurrentSize );
+
+        /** Метод получает и возвращает заявку из связанных буферов (если имеются). */
+        private BaseCall GetCallFromBuffer() {
+            foreach( BaseBuffer buffer in _bindedBuffers ) {
+                if( buffer.IsEmpty ) {
+                    continue;
+                }
+
+                return buffer.PassCall();
+            }
+            return null;
+        }
+
         private bool SendToBuffer( BaseCall call, double _ ) {
             foreach( BaseBuffer buffer in _bindedBuffers ) {
                 if( buffer.TakeCall( call ) ) {
@@ -117,8 +130,21 @@ namespace SimQCore.Modeller.Models.UserModels {
             }
             return false;
         }
+
+        /** Метод заканчивает обработку ближайшей заявки и возвращает её. */
+        private BaseCall EndProcessCall() {
+            BaseCall finishedCall = neareastProcess.processCall;
+
+            int processInd = _processes.FindIndex( p => p.Equals( neareastProcess ) );
+            _processes[processInd] = new() {
+                processEndTime = double.PositiveInfinity,
+                processCall = null
+            };
+
+            return finishedCall;
+        }
         private bool AcceptCall( BaseCall call, double T ) {
-            var processInd = _processes.FindIndex( p => p.Equals( neareastProcess ) );
+            int processInd = _processes.FindIndex( p => p.Equals( neareastProcess ) );
             _processes[processInd] = new() {
                 processEndTime = T + _distribution.Generate(),
                 processCall = call
@@ -155,21 +181,21 @@ namespace SimQCore.Modeller.Models.UserModels {
         public override BaseCall ProcessCall => neareastProcess.processCall;
         public override void BindBuffer( BaseBuffer buffer ) => _bindedBuffers.Add( buffer );
         public override BaseCall DoEvent( double T ) {
-            var finishedCall = neareastProcess.processCall;
-            finishedCall.DoEvent( T );
-
-            var processInd = _processes.FindIndex( p => p.Equals( neareastProcess ) );
-            _processes [processInd] = new() {
-                processEndTime = double.PositiveInfinity,
-                processCall = null
-            };
-
-            _serviceBlockStates.Add( new() {
-                time = T,
-                callsAmount = actualCallsAmount,
-            } );
+            BaseCall finishedCall = EndProcessCall();
 
             Misc.Log( $"\nМодельное время: {T}, агент: {Id}, заявка {finishedCall.Id} обработана.", LogStatus.SUCCESS );
+
+            BaseCall nextCall = GetCallFromBuffer();
+
+            if( nextCall != null ) {
+                // Состояние будет записано в этом методе
+                AcceptCall( nextCall, T );
+            } else {
+                _serviceBlockStates.Add( new() {
+                    time = T,
+                    callsAmount = actualCallsAmount,
+                } );
+            }
 
             return finishedCall;
         }

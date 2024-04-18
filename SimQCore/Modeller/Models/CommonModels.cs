@@ -38,7 +38,6 @@ namespace SimQCore.Modeller.Models.Common {
             foreach( IModellingAgent orbit in Links ) {
                 if( orbit.Type == AgentType.ORBIT ) {
                     if ( ( ( BaseOrbit )orbit ).TakeCall( call, T ) ) {
-                        Misc.Log( $"Заявка отправлена на орбиту { orbit.Id }." );
                         return true;
                     }
                 }
