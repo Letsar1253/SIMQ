@@ -54,9 +54,14 @@ namespace SimQCore.Modeller {
         /// Список связей для всех существующих агентов.
         /// </summary>
         public Dictionary<string, List<IModellingAgent>> Links;
+        public readonly List<IModellingAgent> AgentsForStatistic = new();
 
         public static Problem DeserializeBson( string id ) {
             return BsonSerializer.Deserialize<Problem>( Storage.Storage.GetDocument( id ) );
         }
+
+        public void AddAgentForStatistic( IModellingAgent agent )  
+            =>  AgentsForStatistic.Add( agent );
+        
     }
 }

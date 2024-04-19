@@ -32,9 +32,8 @@ namespace SimQCore.Modeller {
             Supervisor supervisor = new();
             supervisor.Setup( problem );
 
-            data = new();
-            data.SetupStates( problem.Agents );
-
+            data = new(problem.AgentsForStatistic);
+            
             Misc.Log( $"Моделирование задачи \"{problem.Name}\" началось.", LogStatus.WARNING );
 
             double T = 0;
@@ -42,7 +41,7 @@ namespace SimQCore.Modeller {
                 Event nextEvent = supervisor.GetNextEvent();
 
                 // В данном сегменте кода должен проходить сбор статистических данных.
-                data.AddState( nextEvent.ModelTimeStamp - T, problem.Agents );
+                data.AddState( nextEvent.ModelTimeStamp - T, problem.AgentsForStatistic );
 
                 T = nextEvent.ModelTimeStamp;
                 supervisor.FireEvent( nextEvent );

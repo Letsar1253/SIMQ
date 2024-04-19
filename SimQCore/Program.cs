@@ -12,17 +12,19 @@ namespace SimQCore {
     class Program {
         static void Main() {
 
+            Misc.showLogs = false;
+
             // Задачи упомянутые в ВКР - InitExampleProblems()[Номер_задачи]
             // Задача с бесконечным блоком приборов - InitInfServiceBlockProblem()
             // Задача с конечным блоком приборов - InitFinServiceBlockProblem()
-            Problem problem = InitFinServiceBlockProblem(); 
+            Problem problem = InitFinServiceBlockProblem();
 
             SimulationModeller modeller = new();
             modeller.Simulate( problem );
 
             Misc.Log( $"\nСтатистика по результатам моделирования задачи \"{problem.Name}\":" );
 
-            StatisticCollector statistic = new(modeller);
+            StatisticCollector statistic = new(modeller.data);
             statistic.CalcAndPrintAll();
         }
 
@@ -296,13 +298,16 @@ namespace SimQCore {
                 serviceBlock
             };
 
-            return new() {
+            Problem problem = new() {
                 Agents = agentList,
                 Date = DateTime.Now,
                 Name = $"Example M/M/n/c",
                 Links = linkList,
                 MaxModelationTime = 10000
             };
+
+            problem.AddAgentForStatistic(serviceBlock);
+            return problem;
         }
     }
 }

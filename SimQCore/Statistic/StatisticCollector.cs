@@ -13,28 +13,31 @@ namespace SimQCore.Statistic {
         public string GetResult();
     }
 
-    internal class StatisticCollector: DataCollector {
-        private List<IModellingAgent> agents;
+    internal class StatisticCollector {
+        //private List<IModellingAgent> agents;
 
         public Dictionary<IModellingAgent, double> average;
-        public Dictionary<IModellingAgent, double> variance;
-        public int[][] hist;
-        public double[][] cov;
-        public Dictionary<IModellingAgent, Dictionary<int, double>> empDist { get => states; }
+        private Dictionary<IModellingAgent, Dictionary<int, double>> states;
 
-        public StatisticCollector( SimulationModeller modeller ) {
-            _id = Guid.NewGuid().ToString( "N" );
-            Date = DateTime.Now;
+        //public Dictionary<IModellingAgent, double> variance;
+        //public int[][] hist;
+        //public double[][] cov;
+        //public Dictionary<IModellingAgent, Dictionary<int, double>> empDist { get => states; }
+
+        public StatisticCollector( DataCollector data ) {
+            //_id = Guid.NewGuid().ToString( "N" );
+            //Date = DateTime.Now;
  
-            totalTime = modeller.data.totalTime;
-            totalCalls = modeller.data.totalCalls; // зачем?
+            //totalTime = data.totalTime;
+            //totalCalls = modeller.data.totalCalls; // зачем?
             //totalStates = modeller.data.totalStates;
-            states = modeller.data.states;
-            agents = modeller.problem.Agents;
-            NormalizeProbabilities();
+            states = data.agentsStatisticData;
+            //agents = modeller.problem.Agents;
+            NormalizeProbabilities(data.totalTime);
+            CalculateAverages();
         }
 
-        private void NormalizeProbabilities()
+        private void NormalizeProbabilities(double totalTime)
         {
             foreach (IModellingAgent agent in states.Keys)
                 foreach (int i in states[agent].Keys)
@@ -57,7 +60,7 @@ namespace SimQCore.Statistic {
             return maxCallArray;
         }*/
 
-        public void GetAverage() {
+        private void CalculateAverages() {
             average = new ();
             foreach(IModellingAgent agent in states.Keys) { 
                 average.Add(agent, states[agent].Average(s => s.Key * s.Value));
@@ -201,7 +204,8 @@ namespace SimQCore.Statistic {
             }
         }*/
 
-        public void PrintCovariance() {
+        // потом
+        /*public void PrintCovariance() {
             Console.WriteLine();
             if( cov == null || cov.Length == 0 ) {
                 Console.WriteLine( "Ковариационная матрица не определена." );
@@ -213,42 +217,42 @@ namespace SimQCore.Statistic {
                     }
                 }
             }
-        }
+        }*/
 
         public void PrintEmpiricalDistribution() {
             Console.WriteLine();
-            if( empDist == null || empDist.Count == 0 ) {
+            if( states == null || states.Count == 0 ) {
                 Console.WriteLine( "Данные эмпирической функции распределения не определены." );
             } else {
-                foreach (IModellingAgent agent in empDist.Keys)
+                foreach (IModellingAgent agent in states.Keys)
                 {
                     Console.WriteLine($"Данные эмпирической функции распределения {agent.Id}:");
-                    foreach(int i in empDist[agent].Keys)
-                        Console.WriteLine(string.Format("{0} {1:0.00000} ", i, empDist[agent][i]));
+                    foreach(int i in states[agent].Keys)
+                        Console.WriteLine(string.Format("{0} {1:0.00000} ", i, states[agent][i]));
                 }
             }
         }
 
         /** Метод выводит собственные результаты каждого агента. */
-        public void PrintAgentsResults() {
+        // потом
+        /*public void PrintAgentsResults() {
             foreach( IModellingAgent item in agents ) {
                 if( item is IResultableModel ) {
                     Misc.Log( $"\nРезультаты агента {item.Id}:" );
                     Misc.Log( ( item as IResultableModel ).GetResult() );
                 }
             }
-        }
+        }*/
 
-        /** Метод формирует данные результатов моделирования и выводит их. */
+        /** Метод выводит данные результатов моделирования. */
         public void CalcAndPrintAll() {
-            GetAverage();
             //GetCovariance();
             // GetHistogram( 10 );
             //GetEmpiricalDistribution();
             //GetVariance();
 
             PrintAverage();
-            PrintCovariance();
+            //PrintCovariance();
             // PrintHistogram();
             PrintEmpiricalDistribution();
             //PrintVariance();
