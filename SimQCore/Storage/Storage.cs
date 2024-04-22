@@ -3,105 +3,111 @@ using MongoDB.Driver;
 using SimQCore.BsonHelper;
 using MongoDB.Bson.IO;
 using System;
+using SimQCore.Modeller;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using SerializerHelper = SimQCore.BsonHelper.SerializerHelper;
 
 namespace SimQCore.DataBase
-{
-    class Storage
+{   
+    class Storage : IStorage<Problem>
     {
-        private MongoClient client;
-        private static IMongoDatabase database;
-        private static IMongoCollection<BsonDocument> collection;
-        private string cluster = "mongodb+srv://super_user:super_user@cluster0.kcuq1.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
-        private string local = "mongodb://localhost:27017";
+        private const string collectionName = "Problems";
+        private static IMongoCollection<Problem> dbCollection;
+
+        private FilterDefinitionBuilder<Problem> filterBuilder = Builders<Problem>.Filter;
+
+
+        private const string local = "mongodb+srv://zaharkinartur75:0DO7IKFUcfWah8Yk@foodforpowdercluster.n5nxdf5.mongodb.net/";
+
 
         public Storage()
         {
-            var settings = MongoClientSettings.FromConnectionString(cluster);
-            settings.ServerApi = new ServerApi(ServerApiVersion.V1);
-            client = new MongoClient(settings);
-            SetCurrentDataBase("SimQ");
-            SetCurrentCollection("Tasks");
+            var mongoClient = new MongoClient(local);
+            var db = mongoClient.GetDatabase("SimQ");
+            dbCollection = db.GetCollection<Problem>(collectionName);
+            var objectSerializer = new ObjectSerializer(ObjectSerializer.AllAllowedTypes);
+            BsonSerializer.RegisterSerializer(objectSerializer);
             SerializerHelper.DeserializeProblem();
         }
-
-        private void SetCurrentDataBase(string name)
+        /// <summary>
+        /// Получить все задачи
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IEnumerable<Problem>> GetAllAsync()
         {
-            database = client.GetDatabase(name);
+
+            return await dbCollection.Find(filterBuilder.Empty).ToListAsync();
+
         }
-
-        private void SetCurrentCollection(string name)
+        /// <summary>
+        /// Получить задачу по Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<Problem> GetByIdAsync(Guid id)
         {
-            collection = database.GetCollection<BsonDocument>(name);
-            Console.WriteLine(collection);
+            FilterDefinition<Problem> filter = filterBuilder.Eq(x => x._id, id);
+            var problem = await dbCollection.Find(filter).FirstOrDefaultAsync();
+            Console.WriteLine(problem.ToJson(new JsonWriterSettings() { Indent = true }));
+            return problem;
+
         }
-
-        public void ReadDataBases()
+        /// <summary>
+        /// Получить задачу по имени
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public async Task<Problem> GetByNameAsync(string name)
         {
-            var dbList = client.ListDatabases().ToList();
-            Console.WriteLine("The list of databases on this server is: ");
-            foreach (var db in dbList)
+
+            FilterDefinition<Problem> filter = filterBuilder.Eq(x => x.Name, name);
+            var problem = await dbCollection.Find(filter).FirstOrDefaultAsync();
+            Console.WriteLine(problem.ToJson(new JsonWriterSettings() { Indent = true }));
+            return problem;
+        }
+        /// <summary>
+        /// Записать задачу в бд
+        /// </summary>
+        /// <param name="problem"></param>
+        /// <returns></returns>
+        public async Task<bool> CreateAsync(Problem problem)
+        {
+            await dbCollection.InsertOneAsync(problem);
+            return true;
+
+        }
+        /// <summary>
+        /// Изменить задачу
+        /// </summary>
+        /// <param name="problem"></param>
+        /// <returns></returns>
+        public async Task<bool> UpdateAsync(Problem problem)
+        {
+            try
             {
-                Console.WriteLine(db);
+                FilterDefinition<Problem> filter = filterBuilder.Eq(x => x._id, problem._id);
+                await dbCollection.ReplaceOneAsync(filter, problem);
+                return true;
             }
-        }
-
-        public void ReadCollections()
-        {
-            var collList = database.ListCollections().ToList();
-            Console.WriteLine($"The list of collections on {database} is: ");
-            foreach (var coll in collList)
+            catch (Exception ex)
             {
-                Console.WriteLine(coll["name"]);
+                Console.WriteLine(ex.ToString());
+                return false;
             }
+
         }
-
-        public void ReadAllDocuments()
+        /// <summary>
+        /// Удалить задачу по ID
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task DeleteAsync(Guid id)
         {
-            var documents = collection
-                .Find(Builders<BsonDocument>.Filter.Empty)
-                .Project<BsonDocument>(Builders<BsonDocument>.Projection.Include("Name").Include("Date"))
-                .ToList();
-            foreach (var doc in documents)
-            {
-                Console.WriteLine(doc.ToJson(new JsonWriterSettings { Indent = true }));
-            }
-        }
-
-        public void ReadDocument(string id)
-        {
-            var document = collection
-                .Find(Builders<BsonDocument>.Filter.Eq("_id", ObjectId.Parse(id)))
-                .ToList()[0];
-            Console.WriteLine(document.ToJson(new JsonWriterSettings { Indent = true }));
-        }
-
-        public void CreateDocument(BsonDocument doc)
-        {
-            collection.InsertOne(doc);
-        }
-
-        public void UpdateDocument(string id, BsonDocument doc)
-        {
-            var filter = Builders<BsonDocument>.Filter.Eq("_id", ObjectId.Parse(id));
-            var update = Builders<BsonDocument>.Update.Set("Agents", doc["Agents"]).Set("Date", DateTime.Now);
-            collection.UpdateOne(filter, update);
-        }
-
-
-        public void DeleteDocument(string id)
-        {
-            Console.WriteLine("enter id");
-            var filter = Builders<BsonDocument>.Filter.Eq("_id", ObjectId.Parse(id));
-            collection.DeleteOne(filter);
-        }
-
-        public static BsonDocument GetDocument(string id)
-        {
-            var doc = collection
-                .Find(Builders<BsonDocument>.Filter.Eq("_id", ObjectId.Parse(id)))
-                .Project<BsonDocument>(Builders<BsonDocument>.Projection.Exclude("_id"))
-                .ToList()[0];
-            return doc;
+            FilterDefinition<Problem> filter = filterBuilder.Eq(x => x._id, id);
+            await dbCollection.DeleteOneAsync(filter);
         }
     }
 }

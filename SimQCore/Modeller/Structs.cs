@@ -22,7 +22,8 @@ namespace SimQCore.Modeller {
         /// Идентификатор задачи.
         /// </summary>
         [BsonId]
-        public ObjectId _id;
+        [BsonRepresentation(BsonType.String)]
+        public Guid _id;
         /// <summary>
         /// Дата создания задачи.
         /// </summary>
@@ -56,8 +57,8 @@ namespace SimQCore.Modeller {
         /// </summary>
         public Dictionary<string, List<IModellingAgent>> Links;
 
-        public static Problem DeserializeBson( string id ) {
-            return BsonSerializer.Deserialize<Problem>( Storage.GetDocument( id ) );
-        }
+        //public static Problem DeserializeBson( string id ) {
+        //    return BsonSerializer.Deserialize<Problem>( Storage.GetDocument( id ) );
+        //}
     }
 }
