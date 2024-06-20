@@ -9,7 +9,7 @@ namespace SimQCore.Statistic {
         public int GetCurrentState();
     }
 
-    class DataCollector {
+    public class DataCollector {
         public string _id = Guid.NewGuid().ToString("N");
         public DateTime Date = DateTime.Now;
         public string Name;

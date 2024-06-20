@@ -7,9 +7,10 @@ using SimQCore.Statistic;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using SimQCore.RunQS;
 
 namespace SimQCore {
-    class Program {
+    public class Program {
         static void Main() {
 
             Misc.showLogs = false;
@@ -17,16 +18,32 @@ namespace SimQCore {
             // Задачи упомянутые в ВКР - InitExampleProblems()[Номер_задачи]
             // Задача с бесконечным блоком приборов - InitInfServiceBlockProblem()
             // Задача с конечным блоком приборов - InitFinServiceBlockProblem()
-            Problem problem = InitFinServiceBlockProblem();
+
+
+            double Mu = 1;
+            double La = 2; 
+            int S = 1;
+            int Q = 0;
+            //если S = 2, 3 - то возникает ошибка
+            Problem problem = RunQS.RunQS.InitFinServiceBlockProblem(Mu, La, S, Q);
+            //Problem problem = RunQS.RunQS.InitInfServiceBlockProblem(0.2, 0.5);
 
             SimulationModeller modeller = new();
             modeller.Simulate( problem );
 
-            Misc.Log( $"\nСтатистика по результатам моделирования задачи \"{problem.Name}\":" );
+            StatesStatistic StatesStat = new(modeller.data);
 
-            StatisticCollector statistic = new(modeller.data);
-            statistic.CalcAndPrintAll();
+
+            Misc.Log($"\nСтатистика по результатам моделирования задачи \"{modeller.problem.Name}\":");
+
+            StatesStat.Print_EmpDist(StatesStat.states);
+
+            // сохранить эмпирическое распределение в массиве Y
+            StatesStat.Get_EmpDist(StatesStat.states, out double[] Y);
         }
+
+        
+
 
         /** Метод инициализирует 4 задачи, используемые в качестве примеров в ВКР. */
         private static List<Problem> InitExampleProblems() {
@@ -241,73 +258,8 @@ namespace SimQCore {
             return examples;
         }
 
-        /** Метод инициализирует задачу с бесконечным числом обработчиков. */
-        private static Problem InitInfServiceBlockProblem() {
-            Dictionary<string, List<IModellingAgent>> linkList;
-            List<IModellingAgent> agentList;
 
-            var source = new Source( new ExponentialDistribution( 0.2 ) );
-            var serviceBlock = new InfServiceBlocks( new ExponentialDistribution( 0.5 ) );
 
-            linkList = new() {
-                {
-                    source.Id,
-                    new() {
-                        serviceBlock
-                    }
-                }
-            };
-
-            agentList = new() {
-                source,
-                serviceBlock
-            };
-
-            return new() {
-                Agents = agentList,
-                Date = DateTime.Now,
-                Name = $"Example M/M/Inf",
-                Links = linkList,
-                MaxModelationTime = 100
-            };
-        }
-
-        /** Метод инициализирует задачу с конечным числом обработчиков. */
-        private static Problem InitFinServiceBlockProblem() {
-            Dictionary<string, List<IModellingAgent>> linkList;
-            List<IModellingAgent> agentList;
-
-            var queue = new QueueBuffer( 0 );
-            var source = new Source( new ExponentialDistribution( 1.0 ) );
-            var serviceBlock = new FinServiceBlocks( 1, new ExponentialDistribution( 2.0 ) );
-
-            serviceBlock.BindBuffer( queue );
-
-            linkList = new() {
-                {
-                    source.Id,
-                    new() {
-                        serviceBlock
-                    }
-                }
-            };
-
-            agentList = new() {
-                source,
-                queue,
-                serviceBlock
-            };
-
-            Problem problem = new() {
-                Agents = agentList,
-                Date = DateTime.Now,
-                Name = $"Example M/M/n/c",
-                Links = linkList,
-                MaxModelationTime = 10000
-            };
-
-            problem.AddAgentForStatistic(serviceBlock);
-            return problem;
-        }
+        
     }
 }

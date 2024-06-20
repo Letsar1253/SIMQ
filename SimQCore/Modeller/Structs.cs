@@ -16,7 +16,7 @@ namespace SimQCore.Modeller {
         /// </summary>
         public IModellingAgent Agent;
     }
-    class Problem {
+    public class Problem {
         /// <summary>
         /// Идентификатор задачи.
         /// </summary>

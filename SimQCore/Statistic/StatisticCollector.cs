@@ -3,6 +3,7 @@ using SimQCore.Modeller.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 //using Newtonsoft.Json;
 
 namespace SimQCore.Statistic {
@@ -17,14 +18,18 @@ namespace SimQCore.Statistic {
         //private List<IModellingAgent> agents;
 
         public Dictionary<IModellingAgent, double> average;
-        private Dictionary<IModellingAgent, Dictionary<int, double>> states;
+        public Dictionary<IModellingAgent, Dictionary<int, double>> states;
+
+        StatesStatistic StatesStat;
+
 
         //public Dictionary<IModellingAgent, double> variance;
         //public int[][] hist;
         //public double[][] cov;
         //public Dictionary<IModellingAgent, Dictionary<int, double>> empDist { get => states; }
 
-        public StatisticCollector( DataCollector data ) {
+
+        public void CollectStatistic( DataCollector data ) {
             //_id = Guid.NewGuid().ToString( "N" );
             //Date = DateTime.Now;
  
@@ -33,16 +38,14 @@ namespace SimQCore.Statistic {
             //totalStates = modeller.data.totalStates;
             states = data.agentsStatisticData;
             //agents = modeller.problem.Agents;
-            NormalizeProbabilities(data.totalTime);
-            CalculateAverages();
+            StatesStat = new StatesStatistic(data);
+            states = StatesStat.states;
+
+            CalculateAverages(ref average, states);
         }
 
-        private void NormalizeProbabilities(double totalTime)
-        {
-            foreach (IModellingAgent agent in states.Keys)
-                foreach (int i in states[agent].Keys)
-                    states[agent][i] /= totalTime;
-        }
+
+        
 
         // скорее всего, не нужен
         /*public static int [] GetMaxCallArray( List<int> [] st, int total ) {
@@ -60,7 +63,7 @@ namespace SimQCore.Statistic {
             return maxCallArray;
         }*/
 
-        private void CalculateAverages() {
+        private void CalculateAverages(ref Dictionary<IModellingAgent, double> average, Dictionary<IModellingAgent, Dictionary<int, double>> states) {
             average = new ();
             foreach(IModellingAgent agent in states.Keys) { 
                 average.Add(agent, states[agent].Average(s => s.Key * s.Value));
@@ -219,19 +222,10 @@ namespace SimQCore.Statistic {
             }
         }*/
 
-        public void PrintEmpiricalDistribution() {
-            Console.WriteLine();
-            if( states == null || states.Count == 0 ) {
-                Console.WriteLine( "Данные эмпирической функции распределения не определены." );
-            } else {
-                foreach (IModellingAgent agent in states.Keys)
-                {
-                    Console.WriteLine($"Данные эмпирической функции распределения {agent.Id}:");
-                    foreach(int i in states[agent].Keys)
-                        Console.WriteLine(string.Format("{0} {1:0.00000} ", i, states[agent][i]));
-                }
-            }
-        }
+        
+
+
+
 
         /** Метод выводит собственные результаты каждого агента. */
         // потом
@@ -254,11 +248,14 @@ namespace SimQCore.Statistic {
             PrintAverage();
             //PrintCovariance();
             // PrintHistogram();
-            PrintEmpiricalDistribution();
+            StatesStat.Print_EmpDist(StatesStat.states);
             //PrintVariance();
 
             //PrintAgentsResults();
         }
+
+
+
 
         //public static string LoadResultToJson(string id)
         //{

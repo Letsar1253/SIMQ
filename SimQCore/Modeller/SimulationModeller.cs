@@ -1,7 +1,7 @@
 ﻿using SimQCore.Statistic;
 
 namespace SimQCore.Modeller {
-    class SimulationModeller {
+    public class SimulationModeller {
         /// <summary>
         /// Метод проверяет, закончено ли моделирование текущей задачи.
         /// </summary>

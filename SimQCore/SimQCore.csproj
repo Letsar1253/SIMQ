@@ -10,4 +10,10 @@
     <PackageReference Include="MongoDB.Driver" Version="2.24.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="HelpFunctions">
+      <HintPath>..\..\..\Libs_My\HelpFunctions\HelpFunctions\bin\Debug\net8.0\HelpFunctions.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

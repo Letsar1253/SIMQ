@@ -1,6 +1,6 @@
 ﻿namespace SimQCore.Modeller.Models {
 
-    enum AgentType {
+    public enum AgentType {
         SOURCE,         // Источник входящих заявок
         SERVICE_BLOCK,  // Блок приборов
         BUFFER,         // Очередь
@@ -8,7 +8,7 @@
         ORBIT           // Орбита
     }
 
-    interface IModellingAgent {
+    public interface IModellingAgent {
         public string Id {
             get;
         }
@@ -25,7 +25,7 @@
         public bool IsActive();
     }
 
-    abstract class BaseSource: IModellingAgent {
+    public abstract class BaseSource: IModellingAgent {
         private static int idCounter;
         public virtual string Id {
             get; protected set;
@@ -45,7 +45,7 @@
         }
     }
 
-    abstract class BaseServiceBlock: IModellingAgent {
+    public abstract class BaseServiceBlock: IModellingAgent {
         private static int idCounter;
         public virtual string Id {
             get; protected set;
@@ -68,7 +68,7 @@
         public abstract bool TakeCall( BaseCall call, double T );
     }
 
-    abstract class BaseBuffer: IModellingAgent {
+    public abstract class BaseBuffer: IModellingAgent {
         private static int idCounter;
         public virtual string Id {
             get; protected set;
@@ -96,7 +96,7 @@
         }
     }
 
-    abstract class BaseCall: IModellingAgent {
+    public abstract class BaseCall: IModellingAgent {
         private static int idCounter;
         public virtual string Id {
             get; set;
@@ -113,7 +113,7 @@
         public abstract bool IsActive();
     }
 
-    abstract class BaseOrbit: IModellingAgent {
+    public abstract class BaseOrbit: IModellingAgent {
         private static int idCounter;
         public virtual string Id {
             get; protected set;
