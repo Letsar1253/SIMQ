@@ -1,7 +1,6 @@
 ﻿using System;
 
-namespace SimQCore.Library.TestsGenerators
-{
+namespace SimQCore.Library.TestsGenerators {
     /// <summary>
     /// A fast random number generator for .NET
     /// Colin Green, January 2005
@@ -37,8 +36,7 @@ namespace SimQCore.Library.TestsGenerators
     ///  FastRandom are in use or if being used in a multi-threaded environment.
     /// 
     /// </summary>
-    public class Xorshift
-    {
+    public class Xorshift {
         // The +1 ensures NextDouble doesn't generate 1.0
         private const double REAL_UNIT_INT = 1.0 / (int.MaxValue + 1.0);
         private const double REAL_UNIT_UINT = 1.0 / (uint.MaxValue + 1.0);
@@ -54,19 +52,17 @@ namespace SimQCore.Library.TestsGenerators
         /// <summary>
         /// Initialises a new instance using time dependent seed.
         /// </summary>
-        public Xorshift()
-        {
+        public Xorshift() {
             // Initialise using the system tick count.
-            this.Reinitialise(Environment.TickCount);
+            this.Reinitialise( Environment.TickCount );
         }
         /// <summary>
         /// Initialises a new instance using an int value as seed.
         /// This constructor signature is provided to maintain compatibility with
         /// System.Random
         /// </summary>
-        public Xorshift(int seed)
-        {
-            this.Reinitialise(seed);
+        public Xorshift( int seed ) {
+            this.Reinitialise( seed );
         }
         #endregion
         #region Public Methods [Reinitialisation]
@@ -74,12 +70,11 @@ namespace SimQCore.Library.TestsGenerators
         /// Reinitialises using an int value as a seed.
         /// </summary>
         /// <param name="seed"></param>
-        public void Reinitialise(int seed)
-        {
+        public void Reinitialise( int seed ) {
             // The only stipulation stated for the xorshift RNG is that at least one of
             // the seeds x,y,z,w is non-zero. We fulfill that requirement by only allowing
             // resetting of the x seed
-            this._x = (uint)seed;
+            this._x = ( uint )seed;
             this._y = Y;
             this._z = Z;
             this._w = W;
@@ -99,20 +94,19 @@ namespace SimQCore.Library.TestsGenerators
         /// including negative values. 
         /// </summary>
         /// <returns></returns>
-        public int Next()
-        {
-            while (true)
-            {
+        public int Next() {
+            while( true ) {
                 uint t = this._x ^ this._x << 11;
                 this._x = this._y;
                 this._y = this._z;
                 this._z = this._w;
-                this._w = this._w ^ this._w >> 19 ^ (t ^ t >> 8);
+                this._w = this._w ^ this._w >> 19 ^ ( t ^ t >> 8 );
 
                 // Handle the special case where the value int.MaxValue is generated. This is outside of 
                 // the range of permitted values, so we therefore call Next() to try again.
                 uint rtn = this._w & 0x7FFFFFFF;
-                if (rtn != 0x7FFFFFFF) return (int)rtn;
+                if( rtn != 0x7FFFFFFF )
+                    return ( int )rtn;
             }
         }
 
@@ -121,16 +115,17 @@ namespace SimQCore.Library.TestsGenerators
         /// </summary>
         /// <param name="upperBound"></param>
         /// <returns></returns>
-        public int Next(int upperBound)
-        {
+        public int Next( int upperBound ) {
             //no check 4 better performance
             //if ( upperBound < 0 )
             //	throw new ArgumentOutOfRangeException("upperBound", upperBound, "upperBound must be >=0");
             uint t = this._x ^ this._x << 11;
-            this._x = this._y; this._y = this._z; this._z = this._w;
+            this._x = this._y;
+            this._y = this._z;
+            this._z = this._w;
             // The explicit int cast before the first multiplication gives better performance.
             // See comments in NextDouble.
-            return (int)(REAL_UNIT_INT * (int)(0x7FFFFFFF & (this._w = this._w ^ this._w >> 19 ^ (t ^ t >> 8))) * upperBound);
+            return ( int )( REAL_UNIT_INT * ( int )( 0x7FFFFFFF & ( this._w = this._w ^ this._w >> 19 ^ ( t ^ t >> 8 ) ) ) * upperBound );
         }
         /// <summary>
         /// Generates a random int over the range lowerBound to upperBound-1, and not including upperBound.
@@ -139,33 +134,34 @@ namespace SimQCore.Library.TestsGenerators
         /// <param name="lowerBound"></param>
         /// <param name="upperBound"></param>
         /// <returns></returns>
-        public int Next(int lowerBound, int upperBound)
-        {
+        public int Next( int lowerBound, int upperBound ) {
             //no check 4 better performance
             //if ( lowerBound > upperBound )
             //	throw new ArgumentOutOfRangeException("upperBound", upperBound, "upperBound must be >=lowerBound");
             uint t = this._x ^ this._x << 11;
-            this._x = this._y; this._y = this._z; this._z = this._w;
+            this._x = this._y;
+            this._y = this._z;
+            this._z = this._w;
             // The explicit int cast before the first multiplication gives better performance.
             // See comments in NextDouble.
             int range = upperBound - lowerBound;
-            if (range < 0)
-            {	// If range is <0 then an overflow has occured and must resort to using long integer arithmetic instead (slower).
+            if( range < 0 ) {	// If range is <0 then an overflow has occured and must resort to using long integer arithmetic instead (slower).
                 // We also must use all 32 bits of precision, instead of the normal 31, which again is slower.	
-                return lowerBound + (int)(REAL_UNIT_UINT * (this._w = this._w ^ this._w >> 19 ^ (t ^ t >> 8)) * ((long)upperBound - lowerBound));
+                return lowerBound + ( int )( REAL_UNIT_UINT * ( this._w = this._w ^ this._w >> 19 ^ ( t ^ t >> 8 ) ) * ( ( long )upperBound - lowerBound ) );
             }
             // 31 bits of precision will suffice if range<=int.MaxValue. This allows us to cast to an int and gain
             // a little more performance.
-            return lowerBound + (int)(REAL_UNIT_INT * (int)(0x7FFFFFFF & (this._w = (this._w ^ this._w >> 19) ^ (t ^ t >> 8))) * range);
+            return lowerBound + ( int )( REAL_UNIT_INT * ( int )( 0x7FFFFFFF & ( this._w = ( this._w ^ this._w >> 19 ) ^ ( t ^ t >> 8 ) ) ) * range );
         }
         /// <summary>
         /// Generates a random double. Values returned are from 0.0 up to but not including 1.0.
         /// </summary>
         /// <returns></returns>
-        public double NextDouble()
-        {
+        public double NextDouble() {
             uint t = this._x ^ this._x << 11;
-            this._x = this._y; this._y = this._z; this._z = this._w;
+            this._x = this._y;
+            this._y = this._z;
+            this._z = this._w;
             // Here we can gain a 2x speed improvement by generating a value that can be cast to 
             // an int instead of the more easily available uint. If we then explicitly cast to an 
             // int the compiler will then cast the int to a double to perform the multiplication, 
@@ -175,7 +171,7 @@ namespace SimQCore.Library.TestsGenerators
             //
             // Also note that the loss of one bit of precision is equivalent to what occurs within 
             // System.Random.
-            return REAL_UNIT_INT * (int)(0x7FFFFFFF & (this._w = this._w ^ this._w >> 19 ^ (t ^ t >> 8)));
+            return REAL_UNIT_INT * ( int )( 0x7FFFFFFF & ( this._w = this._w ^ this._w >> 19 ^ ( t ^ t >> 8 ) ) );
         }
         /// <summary>
         /// Fills the provided byte array with random bytes.
@@ -233,11 +229,12 @@ namespace SimQCore.Library.TestsGenerators
         /// a uint.
         /// </summary>
         /// <returns></returns>
-        public uint NextUInt()
-        {
+        public uint NextUInt() {
             uint t = this._x ^ this._x << 11;
-            this._x = this._y; this._y = this._z; this._z = this._w;
-            return this._w = this._w ^ this._w >> 19 ^ (t ^ t >> 8);
+            this._x = this._y;
+            this._y = this._z;
+            this._z = this._w;
+            return this._w = this._w ^ this._w >> 19 ^ ( t ^ t >> 8 );
         }
         /// <summary>
         /// Generates a random int over the range 0 to int.MaxValue, inclusive. 
@@ -248,11 +245,12 @@ namespace SimQCore.Library.TestsGenerators
         /// but is not functionally equivalent to System.Random.Next().
         /// </summary>
         /// <returns></returns>
-        public int NextInt()
-        {
+        public int NextInt() {
             uint t = this._x ^ this._x << 11;
-            this._x = this._y; this._y = this._z; this._z = this._w;
-            return (int)(0x7FFFFFFF & (this._w = this._w ^ this._w >> 19 ^ (t ^ t >> 8)));
+            this._x = this._y;
+            this._y = this._z;
+            this._z = this._w;
+            return ( int )( 0x7FFFFFFF & ( this._w = this._w ^ this._w >> 19 ^ ( t ^ t >> 8 ) ) );
         }
         // Buffer 32 bits in bitBuffer, return 1 at a time, keep track of how many have been returned
         // with bitBufferIdx.
@@ -264,34 +262,36 @@ namespace SimQCore.Library.TestsGenerators
         /// ready for future calls.
         /// </summary>
         /// <returns></returns>
-        public bool NextBool()
-        {
-            if (this._bitMask != 1) return (this._bitBuffer & (this._bitMask >>= 1)) == 0;
+        public bool NextBool() {
+            if( this._bitMask != 1 )
+                return ( this._bitBuffer & ( this._bitMask >>= 1 ) ) == 0;
             // Generate 32 more bits.
             uint t = (this._x ^ (this._x << 11));
-            this._x = this._y; this._y = this._z; this._z = this._w;
-            this._bitBuffer = this._w = (this._w ^ (this._w >> 19)) ^ (t ^ (t >> 8));
+            this._x = this._y;
+            this._y = this._z;
+            this._z = this._w;
+            this._bitBuffer = this._w = ( this._w ^ ( this._w >> 19 ) ) ^ ( t ^ ( t >> 8 ) );
 
             // Reset the bitMask that tells us which bit to read next.
             this._bitMask = 0x80000000;
-            return (this._bitBuffer & this._bitMask) == 0;
+            return ( this._bitBuffer & this._bitMask ) == 0;
         }
 
         uint _byteBuffer;
         uint _byteMove = 0;
 
-        public byte NextByte()
-        {
-            if (this._byteMove != 0)
-            {
+        public byte NextByte() {
+            if( this._byteMove != 0 ) {
                 --this._byteMove;
-                return (byte)(this._byteBuffer >>= 8);
+                return ( byte )( this._byteBuffer >>= 8 );
             }
             uint t = this._x ^ this._x << 11;
-            this._x = this._y; this._y = this._z; this._z = this._w;
-            this._byteBuffer = this._w = this._w ^ this._w >> 19 ^ (t ^ t >> 8);
+            this._x = this._y;
+            this._y = this._z;
+            this._z = this._w;
+            this._byteBuffer = this._w = this._w ^ this._w >> 19 ^ ( t ^ t >> 8 );
             this._byteMove = 3;
-            return (byte)this._byteBuffer;
+            return ( byte )this._byteBuffer;
         }
 
         #endregion

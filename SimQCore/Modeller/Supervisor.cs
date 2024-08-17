@@ -1,4 +1,4 @@
-﻿using SimQCore.Modeller.BaseModels;
+﻿using SimQCore.Modeller.Models;
 using System;
 using System.Collections.Generic;
 
@@ -76,10 +76,10 @@ namespace SimQCore.Modeller {
         /// <param name="ModelTime">Текущее модельное время.</param>
         public void FireEvent( Event e ) {
             IModellingAgent Agent = e.Agent;
-            List<IModellingAgent> AgentLinks = Links.ContainsKey( Agent.Id ) 
-                                            ? Links[ Agent.Id ] 
+            List<IModellingAgent> AgentLinks = Links.ContainsKey( Agent.Id )
+                                            ? Links[ Agent.Id ]
                                             : null;
-            Actions[ Agent.EventTag ]( Agent, AgentLinks, e.ModelTimeStamp );
+            Actions [Agent.EventTag]( Agent, AgentLinks, e.ModelTimeStamp );
         }
 
         /// <summary>

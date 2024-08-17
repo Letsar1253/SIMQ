@@ -1,12 +1,10 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using SimQCore.Library.Distributions;
-using SimQCore.Modeller.BaseModels;
+using SimQCore.Statistic;
 using System;
 using System.Collections.Generic;
 
-/// Todo Код просто ужасный, необходим рефакторинг + комментарии
-
-namespace SimQCore.Modeller.CustomModels {
+namespace SimQCore.Modeller.Models.Common {
     internal class Source: BaseSource {
         [BsonElement]
         private readonly IDistribution _distribution;
@@ -40,7 +38,6 @@ namespace SimQCore.Modeller.CustomModels {
             foreach( IModellingAgent orbit in Links ) {
                 if( orbit.Type == AgentType.ORBIT ) {
                     if ( ( ( BaseOrbit )orbit ).TakeCall( call, T ) ) {
-                        Misc.Log( $"Заявка отправлена на орбиту { orbit.Id }.", LogStatus.INFO );
                         return true;
                     }
                 }
@@ -51,7 +48,7 @@ namespace SimQCore.Modeller.CustomModels {
             return false;
         };
 
-        public Source( IDistribution distribution ): base() {
+        public Source( IDistribution distribution ) : base() {
             _distribution = distribution;
             _tau = CalcNextEventTime( 0 );
 
@@ -74,7 +71,7 @@ namespace SimQCore.Modeller.CustomModels {
             CalcNextEventTime( T );
             BaseCall call = CreateCall();
 
-            Misc.Log( $"\nМодельное время: { T }, агент: { Id }, заявка { call.Id } поступила.", LogStatus.SUCCESS );
+            Misc.Log( $"\nМодельное время: {T}, агент: {Id}, заявка {call.Id} поступила.", LogStatus.SUCCESS );
             return call;
         }
 
@@ -86,6 +83,8 @@ namespace SimQCore.Modeller.CustomModels {
         }
 
         public override bool IsActive() => true;
+
+        public override int CallsCreated => _callCounter;
     }
 
     internal class ServiceBlock: BaseServiceBlock {
@@ -107,7 +106,7 @@ namespace SimQCore.Modeller.CustomModels {
             return true;
         };
 
-        public ServiceBlock( IDistribution distribution ): base() {
+        public ServiceBlock( IDistribution distribution ) : base() {
             _distribution = distribution;
 
             Supervisor.AddAction( EventTag, EventAction );
@@ -115,12 +114,12 @@ namespace SimQCore.Modeller.CustomModels {
 
         public override BaseCall ProcessCall => _processCall;
         public override bool IsFree() => _processCall == null;
-        public override string EventTag => "ServiceBlock";
+        public override string EventTag => GetType().Name;
         public override double NextEventTime => _delta;
         public override void BindBuffer( BaseBuffer buffer ) => _bindedBuffers.Add( buffer );
 
         private bool AcceptCall( BaseCall call, double T ) {
-            Misc.Log( $"Заявка { call.Id } принята в обработку устройством { Id }.", LogStatus.INFO );
+            Misc.Log( $"Заявка {call.Id} принята в обработку устройством {Id}." );
             _processCall = call;
             _delta = gS( T );
             return true;
@@ -156,7 +155,7 @@ namespace SimQCore.Modeller.CustomModels {
         public override BaseCall DoEvent( double T ) {
             BaseCall temp = EndProcessCall();
 
-            Misc.Log( $"\nМодельное время: { T }, агент: { Id }, заявка { temp.Id } обработана.", LogStatus.SUCCESS );
+            Misc.Log( $"\nМодельное время: {T}, агент: {Id}, заявка {temp.Id} обработана.", LogStatus.SUCCESS );
 
             TakeNextCall( T );
 
@@ -166,7 +165,7 @@ namespace SimQCore.Modeller.CustomModels {
         private bool SendToBuffer( BaseCall call, double _ ) {
             foreach( BaseBuffer buffer in _bindedBuffers ) {
                 if( buffer.TakeCall( call ) ) {
-                    Misc.Log( $"Заявка { call.Id } попала в буфер { buffer.Id }.", LogStatus.INFO );
+                    Misc.Log( $"Заявка {call.Id} попала в буфер {buffer.Id}." );
                     return true;
                 }
             }
@@ -179,17 +178,15 @@ namespace SimQCore.Modeller.CustomModels {
         public override bool IsActive() => true;
     }
 
-    internal class StackBuffer: BaseBuffer {
+    internal class StackBuffer: BaseBuffer, IAgentStatistic {
         private int _capacity = 0;
 
         [BsonElement]
         private readonly Stack<BaseCall> _calls = new();
 
-        public StackBuffer( int capacity = 0 ): base() => _capacity = capacity;
-
+        public StackBuffer( int capacity = 0 ) : base() => _capacity = capacity;
         public override bool IsEmpty => _calls.Count == 0;
         public override bool IsFull => ( _capacity != 0 ) && ( _calls.Count >= _capacity );
-
         public override BaseCall PassCall() => IsEmpty ? null : _calls.Pop();
 
         public override bool TakeCall( BaseCall newCall ) {
@@ -204,22 +201,22 @@ namespace SimQCore.Modeller.CustomModels {
         public override BaseCall DoEvent( double T ) => null;
         public override bool IsActive() => false;
         public override double NextEventTime => double.PositiveInfinity;
-        public override string EventTag => "StackBuffer";
+        public override string EventTag => GetType().Name;
+        public override int CurrentSize => _calls.Count;
+        /** Текущим состоянием является количество заявок в буфере в момент обращения к агенту. */
+        public int GetCurrentState() => CurrentSize;
     }
 
-    internal class QueueBuffer: BaseBuffer {
+    internal class QueueBuffer: BaseBuffer, IAgentStatistic {
         private int _capacity = 0;
 
         [BsonElement]
         private readonly Queue<BaseCall> _calls = new();
 
-        public QueueBuffer( int capacity = 0 ): base() => _capacity = capacity;
-
+        public QueueBuffer( int capacity = 0 ) : base() => _capacity = capacity;
         public override bool IsEmpty => _calls.Count == 0;
         public override bool IsFull => ( _capacity != 0 ) && ( _calls.Count >= _capacity );
-
         public override BaseCall PassCall() => IsEmpty ? null : _calls.Dequeue();
-
         public override bool TakeCall( BaseCall newCall ) {
             if( IsFull ) {
                 return false;
@@ -232,14 +229,17 @@ namespace SimQCore.Modeller.CustomModels {
         public override BaseCall DoEvent( double T ) => null;
         public override bool IsActive() => false;
         public override double NextEventTime => double.PositiveInfinity;
-        public override string EventTag => "QueueBuffer";
+        public override string EventTag => GetType().Name;
+        public override int CurrentSize => _calls.Count;
+        /** Текущим состоянием является количество заявок в буфере в момент обращения к агенту. */
+        public int GetCurrentState() => CurrentSize;
     }
 
     internal class Call: BaseCall {
         public override BaseCall DoEvent( double T ) => this;
         public override bool IsActive() => false;
         public override double NextEventTime => double.PositiveInfinity;
-        public override string EventTag => "Call";
+        public override string EventTag => GetType().Name;
     }
 
     internal class Orbit: BaseOrbit {
@@ -265,12 +265,12 @@ namespace SimQCore.Modeller.CustomModels {
         private void CalcNextEventTime( double T ) => _teta = _calls.Count == 0
                                                                 ? double.PositiveInfinity
                                                                 : T + _distribution.Generate();
-        public Orbit( IDistribution distribution ): base() {
+        public Orbit( IDistribution distribution ) : base() {
             _distribution = distribution;
             Supervisor.AddAction( EventTag, EventAction );
         }
         public override double NextEventTime => _teta;
-        public override string EventTag => "Orbit";
+        public override string EventTag => GetType().Name;
         public override BaseCall DoEvent( double T ) {
             BaseCall call = _calls.Dequeue();
             CalcNextEventTime( T );
@@ -290,6 +290,7 @@ namespace SimQCore.Modeller.CustomModels {
 
             return true;
         }
+        public override int CurrentSize => _calls.Count;
     }
 
     internal class PollingServiceBlock: BaseServiceBlock {
@@ -325,12 +326,12 @@ namespace SimQCore.Modeller.CustomModels {
 
         public override BaseCall ProcessCall => _processCall;
         public override bool IsFree() => _processCall == null;
-        public override string EventTag => "PollingServiceBlock";
+        public override string EventTag => GetType().Name;
         public override double NextEventTime => Math.Min( _delta, _nextPollingBufferDelta );
         public override void BindBuffer( BaseBuffer buffer ) => _bindedBuffers.Add( buffer );
 
         private bool AcceptCall( BaseCall call, double T ) {
-            Misc.Log( $"Заявка { call.Id } принята в обработку устройством { Id }.", LogStatus.INFO );
+            Misc.Log( $"Заявка {call.Id} принята в обработку устройством {Id}." );
             _processCall = call;
             _delta = gS( T );
             return true;
@@ -366,7 +367,7 @@ namespace SimQCore.Modeller.CustomModels {
                 return null;
             } else {
                 BaseCall temp = EndProcessCall();
-                Misc.Log( $"\nМодельное время: { T }, агент: { Id }, заявка { temp.Id } обработана.", LogStatus.SUCCESS );
+                Misc.Log( $"\nМодельное время: {T}, агент: {Id}, заявка {temp.Id} обработана.", LogStatus.SUCCESS );
                 TakeNextCall( T );
 
                 return temp;
@@ -375,14 +376,14 @@ namespace SimQCore.Modeller.CustomModels {
 
         private void SetNextPollingBuffer() {
             _currentPollingBufferInd = ( _currentPollingBufferInd + 1 ) % _bindedBuffers.Count;
-            Misc.Log( $"\nМодельное время: { _nextPollingBufferDelta }, " +
-                $"агент: { Id } меняет опрашиваемый буфер на { _bindedBuffers[_currentPollingBufferInd].Id }.", LogStatus.WARNING );
+            Misc.Log( $"\nМодельное время: {_nextPollingBufferDelta}, " +
+                $"агент: {Id} меняет опрашиваемый буфер на {_bindedBuffers [_currentPollingBufferInd].Id}.", LogStatus.WARNING );
         }
 
         private bool SendToBuffer( BaseCall call, double _ ) {
             foreach( BaseBuffer buffer in _bindedBuffers ) {
                 if( buffer.TakeCall( call ) ) {
-                    Misc.Log( $"Заявка { call.Id } попала в буфер { buffer.Id }.", LogStatus.INFO );
+                    Misc.Log( $"Заявка {call.Id} попала в буфер {buffer.Id}." );
                     return true;
                 }
             }
@@ -406,14 +407,16 @@ namespace SimQCore.Modeller.CustomModels {
     }
 
     internal class FiniteSource: Source {
-        public bool isBlocked { get; private set; }
+        public bool isBlocked {
+            get; private set;
+        }
 
         public void unBlock( double T ) {
             isBlocked = false;
             CalcNextEventTime( T );
         }
 
-        protected BaseCall CreateCall() {
+        protected new BaseCall CreateCall() {
             FiniteCall call = new FiniteCall( this ) {
                 Id = "CALL_" + Id + "_" + _callCounter++
             };
@@ -425,16 +428,16 @@ namespace SimQCore.Modeller.CustomModels {
             CalcNextEventTime( T );
             BaseCall call = CreateCall();
 
-            Misc.Log( $"\nМодельное время: { T }, агент: { Id }, заявка { call.Id } поступила.", LogStatus.SUCCESS );
+            Misc.Log( $"\nМодельное время: {T}, агент: {Id}, заявка {call.Id} поступила.", LogStatus.SUCCESS );
 
             isBlocked = true;
-            Misc.Log( $"Входящий поток { Id } заблокирован.", LogStatus.INFO );
+            Misc.Log( $"Входящий поток {Id} заблокирован." );
 
             return call;
         }
 
-        public FiniteSource( IDistribution distribution ): base( distribution ) {}
-        public override string EventTag => "FiniteSource";
+        public FiniteSource( IDistribution distribution ) : base( distribution ) { }
+        public override string EventTag => GetType().Name;
 
         public override double NextEventTime => isBlocked ? double.PositiveInfinity : _tau;
     }
@@ -442,11 +445,11 @@ namespace SimQCore.Modeller.CustomModels {
     internal class FiniteCall: Call {
         private FiniteSource _callOwner;
 
-        public FiniteCall( FiniteSource owner ): base() {
+        public FiniteCall( FiniteSource owner ) : base() {
             _callOwner = owner;
         }
         public override BaseCall DoEvent( double T ) {
-            Misc.Log( $"Заявка { Id } покинула систему: источник заявок { _callOwner.Id } разблокирован.", LogStatus.WARNING );
+            Misc.Log( $"Заявка {Id} покинула систему: источник заявок {_callOwner.Id} разблокирован.", LogStatus.WARNING );
             _callOwner?.unBlock( T );
 
             return this;

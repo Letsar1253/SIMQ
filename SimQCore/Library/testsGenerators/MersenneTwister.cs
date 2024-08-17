@@ -13,16 +13,14 @@
 
 using System;
 
-namespace SimQCore.Library.TestsGenerators
-{
+namespace SimQCore.Library.TestsGenerators {
     /// <summary>
     /// Random number generator using Mersenne Twister algorithm
     /// </summary>
     /// <remarks>
     /// Inherits from System.Random
     /// </remarks>
-    public class MersenneTwister : System.Random
-    {
+    public class MersenneTwister: System.Random {
         private UInt32[] _stateVector;
         private const int _stateVectorSize = 624;
         private const int _valueM = 397;
@@ -35,9 +33,8 @@ namespace SimQCore.Library.TestsGenerators
         /// Initializes a new instance of the MersenneTwisterRandom class, 
         /// using a time-dependent default seed value.
         /// </summary>
-        public MersenneTwister()
-        {
-            initialise((UInt32)(System.DateTime.Now.Ticks & 0xFFFFFFFF));
+        public MersenneTwister() {
+            initialise( ( UInt32 )( System.DateTime.Now.Ticks & 0xFFFFFFFF ) );
         }
 
         /// <summary>
@@ -47,9 +44,8 @@ namespace SimQCore.Library.TestsGenerators
         /// <param name="seed">
         /// A number used to calculate a starting value for the pseudo-random number sequence.
         /// </param>
-        public MersenneTwister(int seed)
-        {
-            initialise((UInt32)seed);
+        public MersenneTwister( int seed ) {
+            initialise( ( UInt32 )seed );
         }
 
         /// <summary>
@@ -58,15 +54,13 @@ namespace SimQCore.Library.TestsGenerators
         /// <param name="seed">
         /// A number used to calculate a starting value for the pseudo-random number sequence.
         /// </param>
-        private void initialise(UInt32 seed)
-        {
+        private void initialise( UInt32 seed ) {
             const UInt32 multiplier = 1812433253;
-            _stateVector = new UInt32[_stateVectorSize];
-            _stateVector[0] = seed;
-            for (int index = 1; index < _stateVectorSize; index++)
-            {
-                _stateVector[index] =
-                    (multiplier * (_stateVector[index - 1] ^ (_stateVector[index - 1] >> 30)) + (UInt32)index);
+            _stateVector = new UInt32 [_stateVectorSize];
+            _stateVector [0] = seed;
+            for( int index = 1; index < _stateVectorSize; index++ ) {
+                _stateVector [index] =
+                    ( multiplier * ( _stateVector [index - 1] ^ ( _stateVector [index - 1] >> 30 ) ) + ( UInt32 )index );
             }
             nextValueIndex = _stateVectorSize;
         }
@@ -80,10 +74,9 @@ namespace SimQCore.Library.TestsGenerators
         // Appears need to override Next even if overriding Sample as
         // doesn't appear to use overridden Sample method, at least not in
         // a way which I understand.
-        public override int Next()
-        {
+        public override int Next() {
             // convert down to signed int
-            return (int)(GenerateRandomValue() & 0x7FFFFFFF);
+            return ( int )( GenerateRandomValue() & 0x7FFFFFFF );
         }
 
         /// <summary>
@@ -100,9 +93,8 @@ namespace SimQCore.Library.TestsGenerators
         /// includes zero but not MaxValue.
         /// </returns>
         // Explicitly override so intellisense displays this type!
-        public override int Next(int maxValue)
-        {
-            return base.Next(maxValue);
+        public override int Next( int maxValue ) {
+            return base.Next( maxValue );
         }
 
         /// <summary>
@@ -125,10 +117,9 @@ namespace SimQCore.Library.TestsGenerators
         /// Overrides base method to ensure negative values rounded in
         /// same way under Mono and Microsoft® .NET Framework.
         /// </remarks>
-        public override int Next(int minValue, int maxValue)
-        {
-            return (int)Math.Floor(
-                Sample() * (double)(maxValue - minValue) + (double)minValue);
+        public override int Next( int minValue, int maxValue ) {
+            return ( int )Math.Floor(
+                Sample() * ( double )( maxValue - minValue ) + ( double )minValue );
         }
 
         /// <summary>
@@ -142,8 +133,7 @@ namespace SimQCore.Library.TestsGenerators
         /// This method is the public version of the protected method, 
         /// <see cref="Sample"/>
         /// </remarks>
-        public override double NextDouble()
-        {
+        public override double NextDouble() {
             return base.NextDouble();
         }
 
@@ -156,10 +146,8 @@ namespace SimQCore.Library.TestsGenerators
         // Appears need to override NextBytes even if overriding Sample as
         // doesn't appear to use overridden Sample method, at least not in
         // a way which I understand.
-        public override void NextBytes(byte[] buffer)
-        {
-            if (buffer == null)
-            {
+        public override void NextBytes( byte [] buffer ) {
+            if( buffer == null ) {
                 return;
             }
 
@@ -167,21 +155,24 @@ namespace SimQCore.Library.TestsGenerators
             int numberValues = (int)((bufferLength + 3) / 4);
 
             int bufferIndex = 0;
-            for (int index = 0; index < numberValues; index++)
-            {
+            for( int index = 0; index < numberValues; index++ ) {
                 UInt32 randVal = GenerateRandomValue();
                 byte val = (byte)((randVal & 0xFF000000) >> 24);
-                buffer[bufferIndex++] = val;
-                if (bufferIndex > bufferLength) break;
-                val = (byte)((randVal & 0x00FF0000) >> 16);
-                buffer[bufferIndex++] = val;
-                if (bufferIndex > bufferLength) break;
-                val = (byte)((randVal & 0x0000FF00) >> 8);
-                buffer[bufferIndex++] = val;
-                if (bufferIndex > bufferLength) break;
-                val = (byte)(randVal & 0x000000FF);
-                buffer[bufferIndex++] = val;
-                if (bufferIndex > bufferLength) break;
+                buffer [bufferIndex++] = val;
+                if( bufferIndex > bufferLength )
+                    break;
+                val = ( byte )( ( randVal & 0x00FF0000 ) >> 16 );
+                buffer [bufferIndex++] = val;
+                if( bufferIndex > bufferLength )
+                    break;
+                val = ( byte )( ( randVal & 0x0000FF00 ) >> 8 );
+                buffer [bufferIndex++] = val;
+                if( bufferIndex > bufferLength )
+                    break;
+                val = ( byte )( randVal & 0x000000FF );
+                buffer [bufferIndex++] = val;
+                if( bufferIndex > bufferLength )
+                    break;
             }
         }
 
@@ -191,10 +182,9 @@ namespace SimQCore.Library.TestsGenerators
         /// <returns>
         /// Random number between 0.0 and 1.0.
         /// </returns>
-        protected override double Sample()
-        {
+        protected override double Sample() {
             double twoPower32 = 4294967296.0;
-            return ((double)GenerateRandomValue()) / twoPower32;
+            return ( ( double )GenerateRandomValue() ) / twoPower32;
         }
 
         /// <summary>
@@ -203,48 +193,44 @@ namespace SimQCore.Library.TestsGenerators
         /// <returns>
         /// Random 32 bit intger between 0 and 4294967295 inclusive.
         /// </returns>
-        private UInt32 GenerateRandomValue()
-        {
+        private UInt32 GenerateRandomValue() {
             const UInt32 temperingValue1 = 0x9d2c5680;
             const UInt32 temperingValue2 = 0xefc60000;
             UInt32 randValue;
             UInt32 intermediate;
 
-            if (nextValueIndex >= _stateVectorSize)
-            {
+            if( nextValueIndex >= _stateVectorSize ) {
                 int index;
-                for (index = 0; index < _stateVectorSize - _valueM; index++)
-                {
-                    intermediate = (_stateVector[index] & _upperMask) |
-                        (_stateVector[index + 1] & _lowerMask);
-                    _stateVector[index] =
-                        _stateVector[index + _valueM] ^ (intermediate >> 1) ^
-                        mag01[(int)(intermediate & 1)];
+                for( index = 0; index < _stateVectorSize - _valueM; index++ ) {
+                    intermediate = ( _stateVector [index] & _upperMask ) |
+                        ( _stateVector [index + 1] & _lowerMask );
+                    _stateVector [index] =
+                        _stateVector [index + _valueM] ^ ( intermediate >> 1 ) ^
+                        mag01 [( int )( intermediate & 1 )];
                 }
-                for (; index < _stateVectorSize - 1; index++)
-                {
-                    intermediate = (_stateVector[index] & _upperMask) |
-                        (_stateVector[index + 1] & _lowerMask);
-                    _stateVector[index] =
-                        _stateVector[index + _valueM - _stateVectorSize] ^
-                        (intermediate >> 1) ^
-                        mag01[(int)(intermediate & 1)];
+                for( ; index < _stateVectorSize - 1; index++ ) {
+                    intermediate = ( _stateVector [index] & _upperMask ) |
+                        ( _stateVector [index + 1] & _lowerMask );
+                    _stateVector [index] =
+                        _stateVector [index + _valueM - _stateVectorSize] ^
+                        ( intermediate >> 1 ) ^
+                        mag01 [( int )( intermediate & 1 )];
                 }
-                intermediate = (_stateVector[_stateVectorSize - 1] & _upperMask) |
-                    (_stateVector[0] & _lowerMask);
-                _stateVector[_stateVectorSize - 1] = _stateVector[_valueM - 1] ^
-                    (intermediate >> 1) ^
-                    mag01[(int)(intermediate & 1)];
+                intermediate = ( _stateVector [_stateVectorSize - 1] & _upperMask ) |
+                    ( _stateVector [0] & _lowerMask );
+                _stateVector [_stateVectorSize - 1] = _stateVector [_valueM - 1] ^
+                    ( intermediate >> 1 ) ^
+                    mag01 [( int )( intermediate & 1 )];
 
                 nextValueIndex = 0;
             }
-            randValue = _stateVector[nextValueIndex++];
+            randValue = _stateVector [nextValueIndex++];
 
             // Tempering 
-            randValue ^= (randValue >> 11);
-            randValue ^= (randValue << 7) & temperingValue1;
-            randValue ^= (randValue << 15) & temperingValue2;
-            randValue ^= (randValue >> 18);
+            randValue ^= ( randValue >> 11 );
+            randValue ^= ( randValue << 7 ) & temperingValue1;
+            randValue ^= ( randValue << 15 ) & temperingValue2;
+            randValue ^= ( randValue >> 18 );
 
             return randValue;
         }

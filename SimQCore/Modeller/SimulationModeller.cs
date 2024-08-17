@@ -1,5 +1,7 @@
-﻿namespace SimQCore.Modeller {
-    class SimulationModeller {
+﻿using SimQCore.Statistic;
+
+namespace SimQCore.Modeller {
+    public class SimulationModeller {
         /// <summary>
         /// Метод проверяет, закончено ли моделирование текущей задачи.
         /// </summary>
@@ -8,34 +10,46 @@
         private bool IsDone( double t ) => t >= MaxModelationTime;
 
         /// <summary>
+        /// Экземпляр сборщика результатов.
+        /// </summary>
+        public DataCollector data;
+
+        /// <summary>
+        /// Моделируемая задача.
+        /// </summary>
+        public Problem problem;
+
+        /// <summary>
         /// Максимальное время моделирования. По умолчанию - 30.
         /// </summary>
         public double MaxModelationTime = 30;
 
         public void Simulate( Problem problem ) {
+            this.problem = problem;
+
             MaxModelationTime = problem.MaxModelationTime ?? MaxModelationTime;
 
             Supervisor supervisor = new();
             supervisor.Setup( problem );
 
-            Misc.Log( $"Моделирование задачи \"{ problem.Name }\" началось.", LogStatus.WARNING );
+            data = new(problem.AgentsForStatistic);
+            
+            Misc.Log( $"Моделирование задачи \"{problem.Name}\" началось.", LogStatus.WARNING );
 
             double T = 0;
             while( !IsDone( T ) ) {
                 Event nextEvent = supervisor.GetNextEvent();
 
-                // Для статистических данных.
-                //double deltaT = nextEvent.ModelTime - T;
+                // В данном сегменте кода должен проходить сбор статистических данных.
+                data.AddState( nextEvent.ModelTimeStamp - T, problem.AgentsForStatistic );
 
                 T = nextEvent.ModelTimeStamp;
-
-                // В данном сегменте кода должен проходить сбор статистических данных.
-                //Statistic.SaveState(delta); 
-
                 supervisor.FireEvent( nextEvent );
             }
 
             Misc.Log( "\nМоделирование окончено.", LogStatus.WARNING );
+
+            data.GetAllCalls( problem.Agents );
         }
     }
 }

@@ -2,43 +2,54 @@
 using SimQCore.DataBase;
 using SimQCore.Library.Distributions;
 using SimQCore.Modeller;
-using SimQCore.Modeller.BaseModels;
-using SimQCore.Modeller.CustomModels;
+using SimQCore.Modeller.Models;
+using SimQCore.Modeller.Models.Common;
+using SimQCore.Modeller.Models.UserModels;
+using SimQCore.Statistic;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using SimQCore.RunQS;
 
-using System.Threading.Tasks;
+namespace SimQCore {
+    public class Program {
+        static void Main() {
 
-namespace SimQCore
-{
-    class Program
-    {
+            Misc.showLogs = false;
 
-        static Storage storage = new Storage();
-        static async Task Main()
-        {
-            SimulationModeller SM = new();
-
+            // Задачи упомянутые в ВКР - InitExampleProblems()[Номер_задачи]
+            // Задача с бесконечным блоком приборов - InitInfServiceBlockProblem()
+            // Задача с конечным блоком приборов - InitFinServiceBlockProblem()
 
 
-            // initExampleProblems();
+            double Mu = 1;
+            double La = 2; 
+            int S = 1;
+            int Q = 0;
+            //если S = 2, 3 - то возникает ошибка
+            Problem problem = RunQS.RunQS.InitFinServiceBlockProblem(Mu, La, S, Q);
+            //Problem problem = RunQS.RunQS.InitInfServiceBlockProblem(0.2, 0.5);
 
-            // foreach (var problem in examples)
-            // {
-            //     await storage.CreateAsync(problem);
-            //     Console.WriteLine($"Задача {problem.Name} добавлена");
-            // }
+            SimulationModeller modeller = new();
+            modeller.Simulate( problem );
 
-            var res = await storage.GetByNameAsync("Example 1.");                       
-            SM.Simulate(res);
+            StatesStatistic StatesStat = new(modeller.data);
+
+
+            Misc.Log($"\nСтатистика по результатам моделирования задачи \"{modeller.problem.Name}\":");
+
+            StatesStat.Print_EmpDist(StatesStat.states);
+
+            // сохранить эмпирическое распределение в массиве Y
+            StatesStat.Get_EmpDist(StatesStat.states, out double[] Y);
         }
 
-        /** Коллекция задач-примеров. */
-        private static List<Problem> examples = new();
+        
 
-        /** Метод инициализирует 4 задачи, используемые в качестве примеров. */
-        private static void initExampleProblems()
-        {
+
+        /** Метод инициализирует 4 задачи, используемые в качестве примеров в ВКР. */
+        private static List<Problem> InitExampleProblems() {
+            List<Problem> examples = new();
 
             // Общие переменные.
             Dictionary<string, List<IModellingAgent>> linkList;
@@ -248,12 +259,13 @@ namespace SimQCore
                 Date = DateTime.Now,
                 Name = $"Example 4.",
                 Links = linkList
-            });
+            } );
 
-            //foreach (var item in examples)
-            //{
-            //    storage.CreateDocument(Storage.SerializeBson(item));
-            //}
+            return examples;
         }
+
+
+
+        
     }
 }
