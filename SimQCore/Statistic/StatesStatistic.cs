@@ -1,9 +1,6 @@
 ﻿using SimQCore.Modeller.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SimQCore.Statistic
 {
@@ -30,7 +27,7 @@ namespace SimQCore.Statistic
 
 
         //X = 0,1,2,... Массив X должен начинаться с 0 и увеличиваться на 1
-        public bool Get_EmpDist(Dictionary<IModellingAgent, Dictionary<int, double>> states, out double[] Y)
+        public bool Get_EmpDist(out double[] Y)
         {
             int length = 0;
             Y = new double[length];
@@ -60,12 +57,10 @@ namespace SimQCore.Statistic
         }
 
 
-
-
-        public void Print_EmpDist(Dictionary<IModellingAgent, Dictionary<int, double>> states)
+        public void Print_EmpDist()
         {
             Console.WriteLine();
-            if (states == null || states.Count == 0)
+            if( states == null || states.Count == 0)
             {
                 Console.WriteLine("Данные эмпирической функции распределения не определены.");
             }
@@ -79,9 +74,6 @@ namespace SimQCore.Statistic
                 }
             }
         }
-
-
-
 
 
         /*

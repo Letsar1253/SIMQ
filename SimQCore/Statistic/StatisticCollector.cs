@@ -248,7 +248,7 @@ namespace SimQCore.Statistic {
             PrintAverage();
             //PrintCovariance();
             // PrintHistogram();
-            StatesStat.Print_EmpDist(StatesStat.states);
+            StatesStat.Print_EmpDist();
             //PrintVariance();
 
             //PrintAgentsResults();

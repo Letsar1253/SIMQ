@@ -20,12 +20,12 @@ namespace SimQCore {
             // Задача с конечным блоком приборов - InitFinServiceBlockProblem()
 
 
+            double La = 2;
             double Mu = 1;
-            double La = 2; 
             int S = 1;
-            int Q = 0;
+            int? Q = 0;
             //если S = 2, 3 - то возникает ошибка
-            Problem problem = RunQS.RunQS.InitFinServiceBlockProblem(Mu, La, S, Q);
+            Problem problem = RunQS.RunQS.InitFinServiceBlockProblem(La, Mu, S, Q);
             //Problem problem = RunQS.RunQS.InitInfServiceBlockProblem(0.2, 0.5);
 
             SimulationModeller modeller = new();
@@ -36,10 +36,10 @@ namespace SimQCore {
 
             Misc.Log($"\nСтатистика по результатам моделирования задачи \"{modeller.problem.Name}\":");
 
-            StatesStat.Print_EmpDist(StatesStat.states);
+            StatesStat.Print_EmpDist();
 
             // сохранить эмпирическое распределение в массиве Y
-            StatesStat.Get_EmpDist(StatesStat.states, out double[] Y);
+            StatesStat.Get_EmpDist(out double[] Y);
         }
 
         

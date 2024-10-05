@@ -1,5 +1,4 @@
-﻿using HelpFunctions;
-using SimQCore.Library.Distributions;
+﻿using SimQCore.Library.Distributions;
 using SimQCore.Modeller;
 using SimQCore.Modeller.Models.Common;
 using SimQCore.Modeller.Models.UserModels;
@@ -104,19 +103,20 @@ namespace SimQCore.RunQS
             return problem;
         }
 
-        /** Метод инициализирует задачу с конечным числом обработчиков. */
+        /**
+         * Метод инициализирует задачу с конечным числом обработчиков.
+         * Если значение Q не указано (или установлено в null, то очередь не будет использоваться).
+         * Если значение Q указано в 0, то очередь не ограничена.
+         */
         /** M/M/n/c */
         /* M=Mu / M=La / n=S / c=Q */
-        internal static Problem InitFinServiceBlockProblem(double La = 1, double Mu = 2, int S = 1, int Q = 0, double MaxSimTime = 10000)
+        internal static Problem InitFinServiceBlockProblem(double La = 1, double Mu = 2, int S = 1, int? Q = null, double? MaxSimTime = 10000)
         {
             Dictionary<string, List<IModellingAgent>> linkList;
             List<IModellingAgent> agentList;
 
-            var queue = new QueueBuffer(Q);
             var source = new Source(new ExponentialDistribution(La));
             var serviceBlock = new FinServiceBlocks(S, new ExponentialDistribution(Mu));
-
-            serviceBlock.BindBuffer(queue);
 
             linkList = new() {
                 {
@@ -129,9 +129,14 @@ namespace SimQCore.RunQS
 
             agentList = new() {
                 source,
-                queue,
                 serviceBlock
             };
+
+            if( Q.HasValue ) {
+                var queue = new QueueBuffer( Q.Value ); 
+                serviceBlock.BindBuffer( queue );
+                agentList.Add( queue );
+            }
 
             Problem problem = new()
             {
@@ -145,9 +150,6 @@ namespace SimQCore.RunQS
             problem.AddAgentForStatistic(serviceBlock);
             return problem;
         }
-
-
-
 
 
     }
