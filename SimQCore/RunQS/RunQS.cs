@@ -105,12 +105,11 @@ namespace SimQCore.RunQS
 
         /**
          * Метод инициализирует задачу с конечным числом обработчиков.
-         * Если значение Q не указано (или установлено в null, то очередь не будет использоваться).
-         * Если значение Q указано в 0, то очередь не ограничена.
+         *
+         * M/M/n/c
+         * M=Mu / M=La / n=S / c=Q
          */
-        /** M/M/n/c */
-        /* M=Mu / M=La / n=S / c=Q */
-        internal static Problem InitFinServiceBlockProblem(double La = 1, double Mu = 2, int S = 1, int? Q = null, double? MaxSimTime = 10000)
+        internal static Problem InitFinServiceBlockProblem(double La = 1, double Mu = 2, int S = 1, int Q = 0, double? MaxSimTime = 10000)
         {
             Dictionary<string, List<IModellingAgent>> linkList;
             List<IModellingAgent> agentList;
@@ -132,8 +131,8 @@ namespace SimQCore.RunQS
                 serviceBlock
             };
 
-            if( Q.HasValue ) {
-                var queue = new QueueBuffer( Q.Value ); 
+            if( Q != 0 ) {
+                var queue = new QueueBuffer( Q ); 
                 serviceBlock.BindBuffer( queue );
                 agentList.Add( queue );
             }

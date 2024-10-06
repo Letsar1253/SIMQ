@@ -208,14 +208,18 @@ namespace SimQCore.Modeller.Models.Common {
     }
 
     internal class QueueBuffer: BaseBuffer, IAgentStatistic {
-        private int _capacity = 0;
+        private int _capacity;
 
         [BsonElement]
         private readonly Queue<BaseCall> _calls = new();
 
-        public QueueBuffer( int capacity = 0 ) : base() => _capacity = capacity;
+        /**
+         * Конструктор. Принимает число, отражающее максимальное количество заявок в очереди.
+         * По умолчанию - очередь не органичена.
+         */
+        public QueueBuffer( int capacity = int.MaxValue ) : base() => _capacity = capacity;
         public override bool IsEmpty => _calls.Count == 0;
-        public override bool IsFull => ( _capacity != 0 ) && ( _calls.Count >= _capacity );
+        public override bool IsFull => ( _capacity != int.MaxValue ) && ( _calls.Count >= _capacity );
         public override BaseCall PassCall() => IsEmpty ? null : _calls.Dequeue();
         public override bool TakeCall( BaseCall newCall ) {
             if( IsFull ) {
