@@ -2,12 +2,9 @@
 using SimQCore.Modeller;
 using SimQCore.Modeller.Models;
 using SimQCore.Modeller.Models.Common;
-using SimQCore.Modeller.Models.UserModels;
 using SimQCore.Statistic;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using SimQCore.RunQS;
 
 namespace SimQCore {
     public class Program {
@@ -22,8 +19,8 @@ namespace SimQCore {
 
             double La = 2;
             double Mu = 1;
-            int S = 1;
-            int Q = 0;
+            int S = 3;
+            int Q = 5;
             //если S = 2, 3 - то возникает ошибка
             Problem problem = RunQS.RunQS.InitFinServiceBlockProblem(La, Mu, S, Q);
             //Problem problem = RunQS.RunQS.InitInfServiceBlockProblem(0.2, 0.5);

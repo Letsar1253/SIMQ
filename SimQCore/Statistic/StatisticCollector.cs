@@ -36,7 +36,7 @@ namespace SimQCore.Statistic {
             //totalTime = data.totalTime;
             //totalCalls = modeller.data.totalCalls; // зачем?
             //totalStates = modeller.data.totalStates;
-            states = data.agentsStatisticData;
+
             //agents = modeller.problem.Agents;
             StatesStat = new StatesStatistic(data);
             states = StatesStat.states;

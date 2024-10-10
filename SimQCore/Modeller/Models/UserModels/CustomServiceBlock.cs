@@ -98,13 +98,15 @@ namespace SimQCore.Modeller.Models.UserModels {
         private readonly List<ServiceBlockProcess> _processes = [];
         private readonly List<BaseBuffer> _bindedBuffers = [];
         private readonly IDistribution _distribution;
+
+        /** Метод определяет скоро-освободившийся процесс. */
         private ServiceBlockProcess neareastProcess => _processes.Aggregate( ( selectedElem, nextElem ) =>
-            double.IsPositiveInfinity( selectedElem.processEndTime )
-                || !double.IsPositiveInfinity( nextElem.processEndTime )
-                && selectedElem.processEndTime < nextElem.processEndTime
-                    ? selectedElem
-                    : nextElem
+            ( double.IsPositiveInfinity( nextElem.processEndTime )
+                || ( selectedElem.processEndTime <= nextElem.processEndTime ) )
+                ? selectedElem
+                : nextElem
         );
+
         private int actualCallsAmount =>
             _processes.FindAll( p => p.processCall != null ).Count
                 + _bindedBuffers.Sum( buffer => buffer.CurrentSize );
@@ -144,7 +146,7 @@ namespace SimQCore.Modeller.Models.UserModels {
             return finishedCall;
         }
         private bool AcceptCall( BaseCall call, double T ) {
-            int processInd = _processes.FindIndex( p => p.Equals( neareastProcess ) );
+            int processInd = _processes.FindIndex( p => double.IsPositiveInfinity( p.processEndTime ) );
             _processes[processInd] = new() {
                 processEndTime = T + _distribution.Generate(),
                 processCall = call
@@ -200,7 +202,7 @@ namespace SimQCore.Modeller.Models.UserModels {
             return finishedCall;
         }
         public override bool IsActive() => true;
-        public override bool IsFree() => double.IsPositiveInfinity( neareastProcess.processEndTime );
+        public override bool IsFree() => _processes.Any( process => double.IsPositiveInfinity( process.processEndTime ) );
         public override bool TakeCall( BaseCall call, double T ) => IsFree()
             ? AcceptCall( call, T )
             : SendToBuffer( call, T );

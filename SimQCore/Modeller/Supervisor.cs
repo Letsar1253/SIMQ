@@ -86,7 +86,6 @@ namespace SimQCore.Modeller {
         /// Метод возвращает следующее моделируемое событие.
         /// </summary>
         /// <returns>Следующее событие <paramref name="Event"/></returns>
-        /// <param name="arg">The argument to the method</param>
         public Event GetNextEvent() {
             IModellingAgent nextAgent = null;
             double minT = double.PositiveInfinity;

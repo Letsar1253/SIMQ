@@ -7,7 +7,7 @@ namespace SimQCore.Library {
         private const uint P3 = 3266489917;
         private const uint P4 = 668265263;
         private const uint P5 = 374761393;
-        private const uint max = UInt32.MaxValue;
+        private const uint max = uint.MaxValue;
         public uint seed;
         private uint count;
         private double a;
