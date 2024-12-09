@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AnalyticFunction.CompareDists
+namespace SimQCore.Library.CompareDists
 {
     //Kolmogorov Distance
-    internal class KD: ICompareDists
+    internal class KD : ICompareDists
     {
         public bool CompareDists(double[] Dist1, double[] Dist2, int N, out double Result)
         {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AnalyticFunction.CompareDists
+namespace SimQCore.Library.CompareDists
 {
     internal interface ICompareDists
     {
