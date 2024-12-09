@@ -19,7 +19,8 @@ namespace SimQCore.RunQS
 
 
 
-        /** M/M/n/c */
+        /** M/M/S/Q */
+        /** M/M/S/inf (если Q = int.MaxValue //Models/CommonModels.cs/QueueBuffer)*/
         // запустить MMSQ и получить ее модель
         public bool Run_MMSQ_GetModel(out SimulationModeller modeller, double La = 1, double Mu = 2, int S = 1, int Q = 0, double MaxSimTime = 10000)
         {
@@ -105,9 +106,8 @@ namespace SimQCore.RunQS
 
         /**
          * Метод инициализирует задачу с конечным числом обработчиков.
-         *
          * M/M/n/c
-         * M=Mu / M=La / n=S / c=Q
+         * M=La / M=Mu / n=S / c=Q
          */
         internal static Problem InitFinServiceBlockProblem(double La = 1, double Mu = 2, int S = 1, int Q = 0, double? MaxSimTime = 10000)
         {
