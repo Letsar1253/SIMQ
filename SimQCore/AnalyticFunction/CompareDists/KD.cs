@@ -11,7 +11,7 @@ namespace AnalyticFunction.CompareDists
     {
         public bool CompareDists(double[] Dist1, double[] Dist2, int N, out double Result)
         {
-            if (!kolmogorovDistance(Dist1, Dist2, N, out Result))
+            if (!KolmogorovDistance(Dist1, Dist2, N, out Result))
             {
                 return false;
             }
@@ -22,7 +22,7 @@ namespace AnalyticFunction.CompareDists
 
         }
 
-        protected bool kolmogorovDistance(double[] Empirical, double[] estimatedDist, int N, out double kolmogorovDistance)
+        protected bool KolmogorovDistance(double[] Empirical, double[] estimatedDist, int N, out double kolmogorovDistance)
         {
             double tempMax = double.MinValue;
             double tempDif;
