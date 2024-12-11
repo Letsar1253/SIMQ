@@ -61,7 +61,7 @@ namespace SimQCore.Library.Distributions {
             return x;
         }
 
-        double GA2( double k ) {
+        private double GA2( double k ) {
             double x = _normalDistribution.Generate(0, 1);
             x *= 0.5 * x;
             for( int i = 1; i < k; ++i )

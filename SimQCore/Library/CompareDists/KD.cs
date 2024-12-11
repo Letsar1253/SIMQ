@@ -1,28 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SimQCore.Library.CompareDists
-{
+namespace SimQCore.Library.CompareDists {
     //Kolmogorov Distance
     internal class KD : ICompareDists
     {
         public bool CompareDists(double[] Dist1, double[] Dist2, int N, out double Result)
         {
-            if (!KolmogorovDistance(Dist1, Dist2, N, out Result))
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-
+            return KolmogorovDistance( Dist1, Dist2, N, out Result );
         }
 
-        protected bool KolmogorovDistance(double[] Empirical, double[] estimatedDist, int N, out double kolmogorovDistance)
+        public static bool KolmogorovDistance(double[] Empirical, double[] estimatedDist, int N, out double kolmogorovDistance)
         {
             double tempMax = double.MinValue;
             double tempDif;

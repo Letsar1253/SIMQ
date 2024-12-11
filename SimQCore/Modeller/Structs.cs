@@ -31,21 +31,21 @@ namespace SimQCore.Modeller {
         /// </summary>
         public string Name;
         /// <summary>
-        /// Время, в течение которого будет выполняться моделирование.
+        /// Реальное время, в течение которого будет выполняться моделирование (в секундах).
         /// </summary>
-        public int? MaxRealTime;
+        public int MaxRealTime = 60 * 30;
         /// <summary>
-        /// Предельное количество поступающих заявок, при достижении которого моделирование будет окончено.
+        /// Максимальное количество событий, при достижении которого моделирование будет окончено.
         /// </summary>
-        public int? MaxIncomingCalls;
-        /// <summary>
-        /// Максимальное количество шагов, при достижении которого моделирование будет окончено.
-        /// </summary>
-        public int? MaxModelationSteps;
+        public int MaxEventsAmount = 1_000_000;
         /// <summary>
         /// Максимальное модельное время, при достижении которого моделирование будет окончено.
         /// </summary>
-        public double? MaxModelationTime;
+        public double MaxModelationTime = 1_000;
+        /// <summary>
+        /// Погрешность генерации, при достижении которой моделирование будет окончено.
+        /// </summary>
+        public double MinGenerationError = 0.00001;
         /// <summary>
         /// Список агентов, участвующих в системе.
         /// </summary>
@@ -54,14 +54,14 @@ namespace SimQCore.Modeller {
         /// Список связей для всех существующих агентов.
         /// </summary>
         public Dictionary<string, List<IModellingAgent>> Links;
-        public readonly List<IModellingAgent> AgentsForStatistic = new();
+        public readonly List<IModellingAgent> AgentsForStatistic = [];
 
         public static Problem DeserializeBson( string id ) {
             return BsonSerializer.Deserialize<Problem>( Storage.Storage.GetDocument( id ) );
         }
 
         public void AddAgentForStatistic( IModellingAgent agent )  
-            =>  AgentsForStatistic.Add( agent );
+            => AgentsForStatistic.Add( agent );
         
     }
 }

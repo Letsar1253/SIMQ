@@ -28,23 +28,20 @@ namespace SimQCore {
             SimulationModeller modeller = new();
             modeller.Simulate( problem );
 
-            StatesStatistic StatesStat = new(modeller.data);
-
 
             Misc.Log($"\nСтатистика по результатам моделирования задачи \"{modeller.problem.Name}\":");
 
+            StatesStatistic StatesStat = new(modeller.dataCollector);
             StatesStat.Print_EmpDist();
 
             // сохранить эмпирическое распределение в массиве Y
             StatesStat.Get_EmpDist(out double[] Y);
         }
 
-        
-
-
+       
         /** Метод инициализирует 4 задачи, используемые в качестве примеров в ВКР. */
         private static List<Problem> InitExampleProblems() {
-            List<Problem> examples = new();
+            List<Problem> examples = [];
 
             // Общие переменные.
             Dictionary<string, List<IModellingAgent>> linkList;
@@ -195,11 +192,11 @@ namespace SimQCore {
                 }
             };
 
-            agentList = new() {
+            agentList = [
                 source1, source2, source3, source4,
                 queue1, queue2, queue3,
                 serviceBlock1, serviceBlock2
-            };
+            ];
 
             examples.Add( new() {
                 Agents = agentList,

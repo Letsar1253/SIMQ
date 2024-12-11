@@ -1,6 +1,8 @@
-﻿using SimQCore.Modeller.Models;
+﻿using SimQCore.Library.CompareDists;
+using SimQCore.Modeller.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 //using Newtonsoft.Json;
 
 namespace SimQCore.Statistic {
@@ -10,11 +12,36 @@ namespace SimQCore.Statistic {
     }
 
     public class DataCollector {
+        /// <summary>
+        /// Промежуточные результаты эмпирического распределения, используемые для просчёта расстояния Колмогорова.
+        /// TODO: Изменить?
+        /// </summary>
+        private Dictionary<IModellingAgent,Dictionary<int,double>> prevNormalizedStats;
+
+        /// <summary>
+        /// Шаг по количеству событий, через который будет выполнен пересчёт расстояния Колмогорова.
+        /// </summary>
+        private int GenerationErrorCheckStep = 1000;
+
+        /// <summary>
+        /// Текущее модельное время.
+        /// </summary>
+        public double CurrentModelationTime = 0;
+
+        /// <summary>
+        /// Текущее количество событий.
+        /// </summary>
+        public double CurrentEventsAmount = 0;
+
+        /// <summary>
+        /// Текущий показатель ошибки генерации.
+        /// </summary>
+        public double CurrentGenerationError = 1;
+
         public string _id = Guid.NewGuid().ToString("N");
         public DateTime Date = DateTime.Now;
         public string Name;
 
-        public double totalTime = 0;
         public int totalCalls = 0;
         //public int totalStates = 0;
         public Dictionary<IModellingAgent,Dictionary<int,double>> agentsStatisticData = [];
@@ -31,16 +58,45 @@ namespace SimQCore.Statistic {
                     agentsStatisticData.Add(agent, []);
         }
         
-
         public void AddState( double deltaT, List<IModellingAgent> agents ) {
-            totalTime += deltaT;
+            CurrentModelationTime += deltaT;
+            CurrentEventsAmount++;
             //totalStates++;
+
             foreach( IModellingAgent agent in agents ) {
                 if( agentsStatisticData.ContainsKey(agent) ) {
                     var current_state = (agent as IAgentStatistic).GetCurrentState();
-                    if (agentsStatisticData[agent].ContainsKey(current_state)) agentsStatisticData[agent][current_state] += deltaT; 
-                    else agentsStatisticData[agent].Add(current_state, deltaT);
+                    if (agentsStatisticData[agent].ContainsKey(current_state)) {
+                        agentsStatisticData[agent][current_state] += deltaT;
+                    } else {
+                        agentsStatisticData[agent].Add(current_state, deltaT);
+                    }
                 }
+            }
+
+            // Перерасчёт расстояния Колмогорова
+            if( CurrentEventsAmount % GenerationErrorCheckStep == 0 ) {
+                // Временно реализация такова, но впредь следует переделать
+                Dictionary<IModellingAgent, Dictionary<int, double>> currentNormalizedStats = agentsStatisticData.ToDictionary(
+                    k => k.Key,
+                    v => v.Value.ToDictionary(
+                        k => k.Key,
+                        v => v.Value / CurrentModelationTime
+                    )
+                );
+
+
+                if( prevNormalizedStats != null ) {
+                    foreach( (IModellingAgent agent, Dictionary<int, double> states) in currentNormalizedStats ) {
+                        KD.KolmogorovDistance(
+                            [..states.Values], [..prevNormalizedStats[agent].Values],
+                            states.Count, out double genError
+                        );
+                        CurrentGenerationError = Math.Min(genError, CurrentGenerationError);
+                    }
+                }
+
+                prevNormalizedStats = currentNormalizedStats;
             }
         }
 

@@ -109,7 +109,7 @@ namespace SimQCore.RunQS
          * M/M/n/c
          * M=La / M=Mu / n=S / c=Q
          */
-        internal static Problem InitFinServiceBlockProblem(double La = 1, double Mu = 2, int S = 1, int Q = 0, double? MaxSimTime = 10000)
+        internal static Problem InitFinServiceBlockProblem(double La = 1, double Mu = 2, int S = 1, int Q = 0, double MaxSimTime = 10000)
         {
             Dictionary<string, List<IModellingAgent>> linkList;
             List<IModellingAgent> agentList;

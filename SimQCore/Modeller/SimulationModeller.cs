@@ -1,55 +1,59 @@
 ﻿using SimQCore.Statistic;
+using System;
 
 namespace SimQCore.Modeller {
     public class SimulationModeller {
         /// <summary>
-        /// Метод проверяет, закончено ли моделирование текущей задачи.
+        /// Флаг определяет, закончено ли моделирование текущей задачи.
         /// </summary>
-        /// <param name="t">Текущее модельное время.</param>
-        /// <returns>True - в случае, если моделирование окончено, иначе false.</returns>
-        private bool IsDone( double t ) => t >= MaxModelationTime;
+        private bool isDone =>
+            dataCollector.CurrentModelationTime >= problem.MaxModelationTime
+                || dataCollector.CurrentEventsAmount >= problem.MaxEventsAmount
+                || dataCollector.CurrentGenerationError <= problem.MinGenerationError
+                || ( DateTime.Now - StartRealTime ).TotalSeconds >= problem.MaxRealTime;
+
+        /// <summary>
+        /// Временная точка начала моделирования.
+        /// </summary>
+        private DateTime StartRealTime;
 
         /// <summary>
         /// Экземпляр сборщика результатов.
         /// </summary>
-        public DataCollector data;
+        public DataCollector dataCollector;
 
         /// <summary>
         /// Моделируемая задача.
         /// </summary>
         public Problem problem;
 
-        /// <summary>
-        /// Максимальное время моделирования. По умолчанию - 30.
-        /// </summary>
-        public double MaxModelationTime = 30;
-
         public void Simulate( Problem problem ) {
             this.problem = problem;
 
-            MaxModelationTime = problem.MaxModelationTime ?? MaxModelationTime;
-
-            Supervisor supervisor = new();
-            supervisor.Setup( problem );
-
-            data = new(problem.AgentsForStatistic);
+            Supervisor supervisor = new( problem );
+            dataCollector = new( problem.AgentsForStatistic );
             
             Misc.Log( $"Моделирование задачи \"{problem.Name}\" началось.", LogStatus.WARNING );
 
-            double T = 0;
-            while( !IsDone( T ) ) {
+            StartRealTime = DateTime.Now;
+            double lastEventModelationTime = 0;
+
+            while( !isDone ) {
+                // Получим следующее событие
                 Event nextEvent = supervisor.GetNextEvent();
 
-                // В данном сегменте кода должен проходить сбор статистических данных.
-                data.AddState( nextEvent.ModelTimeStamp - T, problem.AgentsForStatistic );
+                // Обращение к сборщику результатов
+                dataCollector.AddState( nextEvent.ModelTimeStamp - lastEventModelationTime, problem.AgentsForStatistic );
 
-                T = nextEvent.ModelTimeStamp;
+                lastEventModelationTime = nextEvent.ModelTimeStamp;
+
+                // Запустим событие
                 supervisor.FireEvent( nextEvent );
             }
 
-            Misc.Log( "\nМоделирование окончено.", LogStatus.WARNING );
+            Misc.Log( "Моделирование окончено.", LogStatus.WARNING );
 
-            data.GetAllCalls( problem.Agents );
+            dataCollector.GetAllCalls( problem.Agents );
         }
     }
 }

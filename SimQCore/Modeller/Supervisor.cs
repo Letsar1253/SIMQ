@@ -19,7 +19,7 @@ namespace SimQCore.Modeller {
         /// <summary>
         /// Коллекция методов, вызываемых по наступлению событий.
         /// </summary>
-        public static Dictionary<string, Func<IModellingAgent, List<IModellingAgent>, double, bool>> Actions = new();
+        public static Dictionary<string, Func<IModellingAgent, List<IModellingAgent>, double, bool>> Actions = [];
 
         /// <summary>
         /// Коллекция связей агентов. Используется при вызове того или иного события.
@@ -44,12 +44,14 @@ namespace SimQCore.Modeller {
         /// </param>
         /// <param name="Action">Действие, выполняемое при наступлении события.</param>
         public static void AddAction( string EventTag,
-            Func<IModellingAgent, List<IModellingAgent>, double, bool> Action ) {
-
+            Func<IModellingAgent, List<IModellingAgent>, double, bool> Action )
+        {
             if( !Actions.ContainsKey( EventTag ) ) {
                 Actions.Add( EventTag, Action );
             }
         }
+
+        public Supervisor( Problem problem ) => Setup( problem );
 
         /// <summary>
         /// Метод подготавливает диспетчера к моделированию задачи.
@@ -73,7 +75,6 @@ namespace SimQCore.Modeller {
         /// Метод выполняет действие, совершаемое при возникшем событии.
         /// </summary>
         /// <param name="e">Описание происходящего события.</param>
-        /// <param name="ModelTime">Текущее модельное время.</param>
         public void FireEvent( Event e ) {
             IModellingAgent Agent = e.Agent;
             List<IModellingAgent> AgentLinks = Links.ContainsKey( Agent.Id )

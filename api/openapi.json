@@ -1,0 +1,687 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "SIMQ API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://simq.server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Tasks",
+      "description": "Запросы для работы с процессами моделирования (асинхронные задачи)."
+    },
+    {
+      "name": "Problems",
+      "description": "Запросы для работы с задачами моделирования."
+    },
+    {
+      "name": "Agents",
+      "description": "Запросы для работы с агентами моделирования."
+    },
+    {
+      "name": "Results",
+      "description": "Запросы для работы с результатами моделирования."
+    }
+  ],
+  "components": {
+    "parameters": {
+      "task_id": {
+        "name": "task_id",
+        "in": "path",
+        "description": "Идентификатор асинхронной задачи.",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        }
+      },
+      "problem_name": {
+        "name": "problem_name",
+        "in": "path",
+        "description": "Наименование (идентификатор) задачи моделирования.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "byte"
+        }
+      },
+      "result_id": {
+        "name": "result_id",
+        "in": "path",
+        "description": "Идентификатор результата процесса моделирования.",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        }
+      },
+      "agent_id": {
+        "name": "agent_id",
+        "in": "path",
+        "description": "Идентификатор агента моделирования.",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/tasks": {
+      "get": {
+        "tags": [ "Tasks" ],
+        "summary": "Получить список процессов моделирования",
+        "operationId": "getTaskList",
+        "description": "Запрос на получение списка текущий выполняемых задач.",
+        "responses": {
+          "200": {
+            "description": "Успех.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "description": "Список текущих асинхронных задач.",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "task_id",
+                          "status"
+                        ],
+                        "properties": {
+                          "task_id": {
+                            "type": "integer",
+                            "description": "Идентификатор асинхронной задачи."
+                          },
+                          "status": {
+                            "type": "string",
+                            "description": "Текущее состояние асинхронной задачи.",
+                            "enum": [ "Waiting", "Modelling", "Error", "Canceled", "Completed" ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "task_id": 1,
+                      "status": "Error"
+                    },
+                    {
+                      "task_id": 2,
+                      "status": "Completed"
+                    },
+                    {
+                      "task_id": 3,
+                      "status": "Modelling"
+                    },
+                    {
+                      "task_id": 4,
+                      "status": "Waiting"
+                    },
+                    {
+                      "task_id": 5,
+                      "status": "Waiting"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервиса."
+          }
+        }
+      },
+      "post": {
+        "tags": [ "Tasks" ],
+        "summary": "Запустить процесс моделирования",
+        "operationId": "createTask",
+        "description": "Запрос на запуск процесса моделирования задачи.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "data"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "description": "Параметры запуска моделирования.",
+                    "required": [
+                      "problem_name"
+                    ],
+                    "properties": {
+                      "problem_name": {
+                        "type": "string",
+                        "description": "Наименование моделируемой задачи."
+                      },
+                      "max_steps": {
+                        "type": "integer",
+                        "description": "Максимальное количество этапов шагов моделирования.",
+                        "minimum": 0
+                      },
+                      "max_time": {
+                        "type": "integer",
+                        "description": "Максимальное время моделирования, в секундах.",
+                        "minimum": 0
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "problem_name": "Классическая система №1",
+                    "max_time": 1800
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успех."
+          },
+          "404": {
+            "description": "Объект не найден."
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервиса."
+          }
+        }
+      }
+    },
+    "/api/tasks/{task_id}": {
+      "get": {
+        "tags": [ "Tasks" ],
+        "summary": "Получить подробную информацию процесса моделирования",
+        "operationId": "getTaskInfo",
+        "description": "Запрос на получение текущего состояния задачи моделирования (идентификатор, статус, идентификатор задачи, [время начала, время окончания, идентификатор результата]).",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/task_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успех."
+          },
+          "404": {
+            "description": "Объект не найден."
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервиса."
+          }
+        }
+      },
+      "post": {
+        "tags": [ "Tasks" ],
+        "summary": "Остановить моделирование",
+        "operationId": "stopTask",
+        "description": "Запрос на остановку процесса моделирования выполняемой задачи (по идентификатору).",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Успех."
+          },
+          "404": {
+            "description": "Объект не найден."
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервиса."
+          }
+        }
+      }
+    },
+    "/api/problems": {
+      "get": {
+        "tags": [ "Problems" ],
+        "summary": "Получить список задач моделирования",
+        "operationId": "getProblemsList",
+        "description": "Запрос на получение списка задач моделирования.",
+        "responses": {
+          "200": {
+            "description": "Успех.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "description": "Список наименований задач моделирования.",
+                      "items": {
+                        "type": "string",
+                        "description": "Наименование задачи моделирования (выступает её идентификатором)."
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    "Классическая система №1",
+                    "Test problem",
+                    "problem_name_1"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервиса."
+          }
+        }
+      },
+      "post": {
+        "tags": [ "Problems" ],
+        "summary": "Добавить задачу моделирования",
+        "operationId": "registerProblem",
+        "description": "Запрос на добавление новой задачи моделирования.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "data"
+                ],
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "description": "Информация о добавляемой задаче моделирования.",
+                    "required": [
+                      "name",
+                      "agents",
+                      "links"
+                    ],
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Наименование моделируемой задачи."
+                      },
+                      "agents": {
+                        "type": "array",
+                        "description": "Агенты, участвующие в моделируемой системе.",
+                        "items": {
+                          "type": "object",
+                          "description": "Параметры используемых агентов.",
+                          "required": [
+                            "id",
+                            "agent_id"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "Идентификатор агента."
+                            },
+                            "agent_id": {
+                              "type": "string",
+                              "description": "Тип, по которому будет строиться модель агента."
+                            }
+                          },
+                          "additionalProperties": {
+                            "type": "string",
+                            "description": "Дополнительные параметры, используемые для конкретного типа агента."
+                          }
+                        }
+                      },
+                      "links": {
+                        "type": "array",
+                        "description": "Коллекция связей между участниками системы.",
+                        "items": {
+                          "type": "object",
+                          "description": "Элемент коллекции в виде пары идентификаторов ключ-значения.",
+                          "required": [
+                            "from",
+                            "to"
+                          ],
+                          "properties": {
+                            "from": {
+                              "type": "string",
+                              "description": "Идентификатор агента, от которого идёт связь."
+                            },
+                            "to": {
+                              "type": "array",
+                              "description": "Коллекция идентификаторов агентов, к которым идёт связь.",
+                              "items": {
+                                "type": "string",
+                                "description": "Идентификатор связываемого агента."
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "data": {
+                  "name": "Классическая система №1",
+                  "agents": [
+                    {
+                      "id": "Source1",
+                      "class_name": "Source",
+                      "distribution": "ExponentialDistribution",
+                      "rate": 0.2
+                    },
+                    {
+                      "id": "Source2",
+                      "class_name": "Source",
+                      "distribution": "ExponentialDistribution",
+                      "rate": 0.4
+                    },
+                    {
+                      "id": "QueueBuffer3",
+                      "class_name": "QueueBuffer",
+                      "capacity": "0"
+                    },
+                    {
+                      "id": "ServiceBlock4",
+                      "class_name": "ServiceBlock",
+                      "distribution": "ExponentialDistribution",
+                      "rate": 0.3
+                    }
+                  ],
+                  "links": [
+                    {
+                      "from": "Source1",
+                      "to": [ "QueueBuffer3" ]
+                    },
+                    {
+                      "from": "Source2",
+                      "to": [ "QueueBuffer3" ]
+                    },
+                    {
+                      "from": "QueueBuffer3",
+                      "to": [ "ServiceBlock4" ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Успех."
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервиса."
+          }
+        }
+      }
+    },
+    "/api/problems/{problem_name}": {
+      "get": {
+        "tags": [ "Problems" ],
+        "summary": "Получить подробную информацию о задаче моделирования",
+        "operationId": "getProblemInfo",
+        "description": "Запрос на получение подробной информации о задаче моделирования (идентификатор, наименование, параметры задачи, список агентов (идентификатор агента, идентификатор класса, параметры), список связей, [идентификаторы результатов, идентификаторы асинхронных задач]).",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/problem_name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успех."
+          },
+          "404": {
+            "description": "Объект не найден."
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервиса."
+          }
+        }
+      },
+      "delete": {
+        "tags": [ "Problems" ],
+        "summary": "Удалить задачу моделирования",
+        "operationId": "deleteProblem",
+        "description": "Запрос на удаление задачи моделирования из общего списка (по идентификатору).",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/problem_name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успех."
+          },
+          "404": {
+            "description": "Объект не найден."
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервиса."
+          }
+        }
+      }
+    },
+    "/api/problems/{problem_name}/results": {
+      "get": {
+        "tags": [ "Results" ],
+        "summary": "Получить список результатов моделирования",
+        "operationId": "getResults",
+        "description": "Запрос на получение списка результатов моделирования (идентификатор, идентификатор задачи моделирования, дата и время запуска моделирования).",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/problem_name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успех."
+          },
+          "404": {
+            "description": "Объект не найден."
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервиса."
+          }
+        }
+      }
+    },
+    "/api/problems/{problem_name}/results/{result_id}": {
+      "get": {
+        "tags": [ "Results" ],
+        "summary": "Получить подробную информацию о результате",
+        "operationId": "getResultInfo",
+        "description": "Запрос на получение полного описания результата моделирования.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/problem_name"
+          },
+          {
+            "$ref": "#/components/parameters/result_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успех."
+          },
+          "404": {
+            "description": "Объект не найден."
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервиса."
+          }
+        }
+      },
+      "delete": {
+        "tags": [ "Results" ],
+        "summary": "Удалить результат моделирования",
+        "operationId": "deleteResult",
+        "description": "Запрос на удаление результата моделирования.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/problem_name"
+          },
+          {
+            "$ref": "#/components/parameters/result_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успех."
+          },
+          "404": {
+            "description": "Объект не найден."
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервиса."
+          }
+        }
+      }
+    },
+    "/api/agents": {
+      "get": {
+        "tags": [ "Agents" ],
+        "summary": "Получить список видов агентов моделирования",
+        "operationId": "getAgentsList",
+        "description": "Запрос на получение списка агентов, используемых для построения задачи моделирования.",
+        "responses": {
+          "200": {
+            "description": "Успех.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "data"
+                  ],
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "description": "Список моделей агентов моделирования.",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "agent_id",
+                          "description",
+                          "type"
+                        ],
+                        "properties": {
+                          "agent_id": {
+                            "type": "string",
+                            "description": "Идентификатор модели агента."
+                          },
+                          "description": {
+                            "type": "string",
+                            "description": "Описание модели агента."
+                          },
+                          "type": {
+                            "type": "string",
+                            "description": "Тип модели агента.",
+                            "enum": [ "Source", "ServiceBlock", "Buffer", "Orbit" ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": [
+                    {
+                      "agent_id": "Source",
+                      "description": "Стандартная модель источника заявок.",
+                      "type": "Source"
+                    },
+                    {
+                      "agent_id": "ServiceBlock",
+                      "description": "Стандартная модель обработчика заявок.",
+                      "type": "ServiceBlock"
+                    },
+                    {
+                      "agent_id": "StackBuffer",
+                      "description": "Буффер заявок, с устройством организации 'стек'.",
+                      "type": "Buffer"
+                    },
+                    {
+                      "agent_id": "QueueBuffer",
+                      "description": "Буффер заявок, с устройством организации 'очередь'.",
+                      "type": "Buffer"
+                    },
+                    {
+                      "agent_id": "Orbit",
+                      "description": "Стандартная модель орбиты.",
+                      "type": "Orbit"
+                    },
+                    {
+                      "agent_id": "PollingServiceBlock",
+                      "description": "Модель обработчика заявок, используемая для построения циклических СМО.",
+                      "type": "ServiceBlock"
+                    },
+                    {
+                      "agent_id": "FiniteSource",
+                      "description": "Модель источника заявок, используемая для построения систем с конечным числом источников.",
+                      "type": "Source"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервиса."
+          }
+        }
+      },
+      "post": {
+        "tags": [ "Agents" ],
+        "summary": "Добавить новую модель агента",
+        "operationId": "registerAgent",
+        "description": "Запрос на добавление новой модели агента, описанной пользователем системы.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Успех."
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервиса."
+          }
+        }
+      }
+    },
+    "/api/agents/{agent_id}": {
+      "delete": {
+        "tags": [ "Agents" ],
+        "summary": "Удалить модель агента",
+        "operationId": "deleteAgent",
+        "description": "Запрос на удаление модели агента из системы.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/agent_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Успех."
+          },
+          "404": {
+            "description": "Объект не найден."
+          },
+          "500": {
+            "description": "Внутренняя ошибка сервиса."
+          }
+        }
+      }
+    }
+  }
+}

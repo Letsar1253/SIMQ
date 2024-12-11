@@ -14,7 +14,7 @@ namespace SimQCore.Statistic
         {
             states = data.agentsStatisticData;
 
-            NormalizeStatesProbs(ref states, data.totalTime);
+            NormalizeStatesProbs(ref states, data.CurrentModelationTime);
         }
 
 

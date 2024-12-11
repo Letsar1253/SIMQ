@@ -10,7 +10,7 @@ namespace SimQCore {
     }
 
     public static class Misc {
-        public static bool showLogs {  get; set; } =true;
+        public static bool showLogs { get; set; } = true;
         public static void Log(string message, LogStatus status = LogStatus.INFO) {
             if (showLogs)
             {
