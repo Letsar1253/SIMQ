@@ -1,6 +1,6 @@
 ﻿namespace SimQCore.Library.CompareDists {
-    internal interface ICompareDists
+    public interface ICompareDists
     {
-        bool CompareDists(double[] Dist1, double[] Dist2, int N, out double Result);
+        public bool CompareDists(double[] dist1, double[] dist2, int N, out double result);
     }
 }

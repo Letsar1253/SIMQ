@@ -21,7 +21,7 @@ namespace SimQCore {
             double Mu = 1;
             int S = 3;
             int Q = 5;
-            //если S = 2, 3 - то возникает ошибка
+
             Problem problem = RunQS.RunQS.InitFinServiceBlockProblem(La, Mu, S, Q);
             //Problem problem = RunQS.RunQS.InitInfServiceBlockProblem(0.2, 0.5);
 

@@ -24,7 +24,6 @@ namespace SimQCore.RunQS
         // запустить MMSQ и получить ее модель
         public bool Run_MMSQ_GetModel(out SimulationModeller modeller, double La = 1, double Mu = 2, int S = 1, int Q = 0, double MaxSimTime = 10000)
         {
-            //если S = 2, 3 - то возникает ошибка
             Problem problem = InitFinServiceBlockProblem(La, Mu, S, Q, MaxSimTime);
 
             modeller = new();
@@ -47,7 +46,6 @@ namespace SimQCore.RunQS
         // запустить M/M/inf/inf и получить ее модель
         public bool Run_MMinf_GetModel(out SimulationModeller modeller, double La = 0.2, double Mu = 0.5, double MaxSimTime = 100)
         {
-            //если S = 2, 3 - то возникает ошибка
             Problem problem = InitInfServiceBlockProblem(La, Mu, MaxSimTime);
 
             modeller = new();
@@ -100,7 +98,7 @@ namespace SimQCore.RunQS
                 MaxModelationTime = MaxSimTime
             };
 
-            problem.AddAgentForStatistic(serviceBlock); //добавила
+            problem.AddAgentForStatistic(serviceBlock); 
             return problem;
         }
 

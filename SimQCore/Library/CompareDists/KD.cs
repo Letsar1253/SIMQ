@@ -2,21 +2,21 @@
 
 namespace SimQCore.Library.CompareDists {
     //Kolmogorov Distance
-    internal class KD : ICompareDists
+    public class KD : ICompareDists
     {
-        public bool CompareDists(double[] Dist1, double[] Dist2, int N, out double Result)
+        public bool CompareDists(double[] dist1, double[] dist2, int N, out double result)
         {
-            return KolmogorovDistance( Dist1, Dist2, N, out Result );
+            return KolmogorovDistance( dist1, dist2, N, out result );
         }
 
-        public static bool KolmogorovDistance(double[] Empirical, double[] estimatedDist, int N, out double kolmogorovDistance)
+        public static bool KolmogorovDistance(double[] dist1, double[] dist2, int N, out double kolmogorovDistance)
         {
             double tempMax = double.MinValue;
             double tempDif;
 
             for (int i = 0; i < N; i++)
             {
-                tempDif = Math.Abs(Empirical[i] - estimatedDist[i]);
+                tempDif = Math.Abs(dist1[i] - dist2[i]);
                 if (tempDif > tempMax)
                 {
                     tempMax = tempDif;
