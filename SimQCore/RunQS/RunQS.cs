@@ -141,7 +141,11 @@ namespace SimQCore.RunQS
                 Date = DateTime.Now,
                 Name = $"Example M={La}/M={Mu}/n={S}/c={Q}",
                 Links = linkList,
-                MaxModelationTime = MaxSimTime
+                MaxModelationTime = MaxSimTime,
+                generationErrorSettings = new() {
+                    GenerationErrorCheckStepModifier = 2,
+                    GenerationErrorCheckStep = 1000,
+                }
             };
 
             problem.AddAgentForStatistic(serviceBlock);

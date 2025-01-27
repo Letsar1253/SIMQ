@@ -1,4 +1,5 @@
 ﻿using SimQCore.Library.CompareDists;
+using SimQCore.Modeller;
 using SimQCore.Modeller.Models;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,25 @@ using System.Linq;
 //using Newtonsoft.Json;
 
 namespace SimQCore.Statistic {
+    public struct GenerationErrorSettings {
+        /// <summary>
+        /// Шаг, для определения момента перерасчёта расстояния Колмогорова (n).
+        /// </summary>
+        public int GenerationErrorCheckStep = 10_000;
+
+        /// <summary>
+        /// Множитель, используемый для определения следующего момента перерасчёта расстояния Колмогорова (k).
+        /// </summary>
+        public int GenerationErrorCheckStepModifier = 3;
+
+        /// <summary>
+        /// Погрешность генерации, при достижении которой моделирование будет окончено (eps).
+        /// </summary>
+        public double MinGenerationError = 0.00001;
+
+        public GenerationErrorSettings() {}
+    }
+
     public interface IAgentStatistic {
         /** Метод возвращает текущее состояние агента моделирования. */
         public int GetCurrentState();
@@ -19,9 +39,29 @@ namespace SimQCore.Statistic {
         private Dictionary<IModellingAgent,Dictionary<int,double>> prevNormalizedStats;
 
         /// <summary>
-        /// Шаг по количеству событий, через который будет выполнен пересчёт расстояния Колмогорова.
+        /// Номер события, на момент которого необходимо выполнить перерасчёт расстояния Колмогорова.
         /// </summary>
-        private int GenerationErrorCheckStep = 1000;
+        private int GenerationErrorCheckEventsAmount;
+
+        /// <summary>
+        /// Количество раз выполнения перерасчёта расстояния Колмогорова.
+        /// </summary>
+        private int GenerationErrorChecksAmount = 0;
+
+        /// <summary>
+        /// Моделируемая задача.
+        /// </summary>
+        private Problem problem;
+
+        /// <summary>
+        /// Текущее количество событий.
+        /// </summary>
+        private double CurrentEventsAmount = 0;
+
+        /// <summary>
+        /// Текущий показатель ошибки генерации.
+        /// </summary>
+        private double CurrentGenerationError = 1;
 
         /// <summary>
         /// Текущее модельное время.
@@ -29,14 +69,12 @@ namespace SimQCore.Statistic {
         public double CurrentModelationTime = 0;
 
         /// <summary>
-        /// Текущее количество событий.
+        /// Флаг определяет, закончено ли моделирование текущей задачи по статистическим измерениям.
         /// </summary>
-        public double CurrentEventsAmount = 0;
-
-        /// <summary>
-        /// Текущий показатель ошибки генерации.
-        /// </summary>
-        public double CurrentGenerationError = 1;
+        public bool isDone =>
+            CurrentModelationTime >= problem.MaxModelationTime
+                || CurrentEventsAmount >= problem.MaxEventsAmount
+                || CurrentGenerationError <= problem.generationErrorSettings.MinGenerationError;
 
         public string _id = Guid.NewGuid().ToString("N");
         public DateTime Date = DateTime.Now;
@@ -46,9 +84,12 @@ namespace SimQCore.Statistic {
         //public int totalStates = 0;
         public Dictionary<IModellingAgent,Dictionary<int,double>> agentsStatisticData = [];
 
-        public DataCollector(List<IModellingAgent> agents)
+        public DataCollector(Problem problem)
         {
-            SetupStates(agents);
+            this.problem = problem;
+            GenerationErrorCheckEventsAmount = problem.generationErrorSettings.GenerationErrorCheckStep;
+
+            SetupStates(problem.AgentsForStatistic);
         }
 
         public void SetupStates(List<IModellingAgent> agents) { 
@@ -65,7 +106,7 @@ namespace SimQCore.Statistic {
 
             foreach( IModellingAgent agent in agents ) {
                 if( agentsStatisticData.ContainsKey(agent) ) {
-                    var current_state = (agent as IAgentStatistic).GetCurrentState();
+                    int current_state = (agent as IAgentStatistic).GetCurrentState();
                     if (agentsStatisticData[agent].ContainsKey(current_state)) {
                         agentsStatisticData[agent][current_state] += deltaT;
                     } else {
@@ -75,7 +116,7 @@ namespace SimQCore.Statistic {
             }
 
             // Перерасчёт расстояния Колмогорова
-            if( CurrentEventsAmount % GenerationErrorCheckStep == 0 ) {
+            if( CurrentEventsAmount >= GenerationErrorCheckEventsAmount ) {
                 // Временно реализация такова, но впредь следует переделать
                 Dictionary<IModellingAgent, Dictionary<int, double>> currentNormalizedStats = agentsStatisticData.ToDictionary(
                     k => k.Key,
@@ -97,6 +138,13 @@ namespace SimQCore.Statistic {
                 }
 
                 prevNormalizedStats = currentNormalizedStats;
+
+                GenerationErrorChecksAmount++;
+                GenerationErrorCheckEventsAmount +=
+                    problem.generationErrorSettings.GenerationErrorCheckStep
+                    * problem.generationErrorSettings.GenerationErrorCheckStepModifier
+                    * GenerationErrorChecksAmount;
+                Console.WriteLine( CurrentEventsAmount );
             }
         }
 

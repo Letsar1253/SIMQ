@@ -7,31 +7,29 @@ namespace SimQCore.Modeller {
         /// Флаг определяет, закончено ли моделирование текущей задачи.
         /// </summary>
         private bool isDone =>
-            dataCollector.CurrentModelationTime >= problem.MaxModelationTime
-                || dataCollector.CurrentEventsAmount >= problem.MaxEventsAmount
-                || dataCollector.CurrentGenerationError <= problem.MinGenerationError
-                || ( DateTime.Now - StartRealTime ).TotalSeconds >= problem.MaxRealTime;
+            ( DateTime.Now - StartRealTime ).TotalSeconds >= problem.MaxRealTime
+                || dataCollector.isDone;
 
         /// <summary>
-        /// Временная точка начала моделирования.
+        /// Отметка времени начала моделирования.
         /// </summary>
         private DateTime StartRealTime;
+
+        /// <summary>
+        /// Моделируемая задача.
+        /// </summary>
+        private Problem problem;
 
         /// <summary>
         /// Экземпляр сборщика результатов.
         /// </summary>
         public DataCollector dataCollector;
 
-        /// <summary>
-        /// Моделируемая задача.
-        /// </summary>
-        public Problem problem;
-
         public void Simulate( Problem problem ) {
             this.problem = problem;
 
             Supervisor supervisor = new( problem );
-            dataCollector = new( problem.AgentsForStatistic );
+            dataCollector = new( problem );
             
             Misc.Log( $"Моделирование задачи \"{problem.Name}\" началось.", LogStatus.WARNING );
 

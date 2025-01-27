@@ -2,6 +2,7 @@
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Attributes;
 using SimQCore.Modeller.Models;
+using SimQCore.Statistic;
 using System;
 using System.Collections.Generic;
 
@@ -33,7 +34,7 @@ namespace SimQCore.Modeller {
         /// <summary>
         /// Реальное время, в течение которого будет выполняться моделирование (в секундах).
         /// </summary>
-        public int MaxRealTime = 60 * 30;
+        public int MaxRealTime = 30 * 60;
         /// <summary>
         /// Максимальное количество событий, при достижении которого моделирование будет окончено.
         /// </summary>
@@ -43,9 +44,9 @@ namespace SimQCore.Modeller {
         /// </summary>
         public double MaxModelationTime = 1_000;
         /// <summary>
-        /// Погрешность генерации, при достижении которой моделирование будет окончено.
+        /// Настройки вычисления ошибки генерации.
         /// </summary>
-        public double MinGenerationError = 0.00001;
+        public GenerationErrorSettings generationErrorSettings = new();
         /// <summary>
         /// Список агентов, участвующих в системе.
         /// </summary>
@@ -55,10 +56,6 @@ namespace SimQCore.Modeller {
         /// </summary>
         public Dictionary<string, List<IModellingAgent>> Links;
         public readonly List<IModellingAgent> AgentsForStatistic = [];
-
-        public static Problem DeserializeBson( string id ) {
-            return BsonSerializer.Deserialize<Problem>( Storage.Storage.GetDocument( id ) );
-        }
 
         public void AddAgentForStatistic( IModellingAgent agent )  
             => AgentsForStatistic.Add( agent );

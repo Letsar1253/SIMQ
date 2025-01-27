@@ -29,7 +29,7 @@ namespace SimQCore {
             modeller.Simulate( problem );
 
 
-            Misc.Log($"\nСтатистика по результатам моделирования задачи \"{modeller.problem.Name}\":");
+            Misc.Log($"\nСтатистика по результатам моделирования задачи \"{problem.Name}\":");
 
             StatesStatistic StatesStat = new(modeller.dataCollector);
             StatesStat.Print_EmpDist();
