@@ -19,10 +19,20 @@ namespace SimQCore {
 
             double La = 2;
             double Mu = 1;
-            int S = 3;
+            int S = 4;
             int Q = 5;
 
-            Problem problem = RunQS.RunQS.InitFinServiceBlockProblem(La, Mu, S, Q);
+            GenerationErrorSettings ges = new()
+            {
+                GenerationErrorCheckStep = 1000,
+                GenerationErrorCheckStepModifier = 2,
+                MinGenerationError = 0.00001
+            };
+            int MaxEventsAmount = 1_000_000;
+            int MaxRealTime = 30 * 60;
+            double MaxModelationTime = 10000;
+
+            Problem problem = RunQS.RunQS.InitFinServiceBlockProblem(ges, La, Mu, S, Q, MaxEventsAmount, MaxRealTime, MaxModelationTime);
             //Problem problem = RunQS.RunQS.InitInfServiceBlockProblem(0.2, 0.5);
 
             SimulationModeller modeller = new();

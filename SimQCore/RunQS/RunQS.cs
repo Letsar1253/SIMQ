@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SimQCore.Statistic;
 
 namespace SimQCore.RunQS
 {
@@ -22,9 +23,10 @@ namespace SimQCore.RunQS
         /** M/M/S/Q */
         /** M/M/S/inf (если Q = int.MaxValue //Models/CommonModels.cs/QueueBuffer)*/
         // запустить MMSQ и получить ее модель
-        public bool Run_MMSQ_GetModel(out SimulationModeller modeller, double La = 1, double Mu = 2, int S = 1, int Q = 0, double MaxSimTime = 10000)
+        public bool Run_MMSQ_GetModel(GenerationErrorSettings ges, out SimulationModeller modeller, double La = 1, double Mu = 2, int S = 1, int Q = 0,
+                                        int MaxEventsAmount = 1_000_000, int MaxRealTime = 30 * 60, double MaxSimTime = 10000)
         {
-            Problem problem = InitFinServiceBlockProblem(La, Mu, S, Q, MaxSimTime);
+            Problem problem = InitFinServiceBlockProblem(ges, La, Mu, S, Q, MaxEventsAmount, MaxRealTime, MaxSimTime);
 
             modeller = new();
 
@@ -107,7 +109,8 @@ namespace SimQCore.RunQS
          * M/M/n/c
          * M=La / M=Mu / n=S / c=Q
          */
-        internal static Problem InitFinServiceBlockProblem(double La = 1, double Mu = 2, int S = 1, int Q = 0, double MaxSimTime = 10000)
+        internal static Problem InitFinServiceBlockProblem(GenerationErrorSettings ges, double La = 1, double Mu = 2, int S = 1, int Q = 0,
+                                                           int MaxEventsAmount = 1_000_000, int MaxRealTime = 30 * 60, double MaxSimTime = 10000)
         {
             Dictionary<string, List<IModellingAgent>> linkList;
             List<IModellingAgent> agentList;
@@ -142,10 +145,7 @@ namespace SimQCore.RunQS
                 Name = $"Example M={La}/M={Mu}/n={S}/c={Q}",
                 Links = linkList,
                 MaxModelationTime = MaxSimTime,
-                generationErrorSettings = new() {
-                    GenerationErrorCheckStepModifier = 2,
-                    GenerationErrorCheckStep = 1000,
-                }
+                generationErrorSettings = ges,
             };
 
             problem.AddAgentForStatistic(serviceBlock);
