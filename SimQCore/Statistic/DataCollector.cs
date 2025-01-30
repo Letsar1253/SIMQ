@@ -126,12 +126,13 @@ namespace SimQCore.Statistic {
                     )
                 );
 
-
                 if( prevNormalizedStats != null ) {
                     foreach( (IModellingAgent agent, Dictionary<int, double> states) in currentNormalizedStats ) {
+                        // Предыдущий замер (prevNormalizedStats) может иметь
+                        // меньшее количество состояний, чем текущее (states)
                         KD.KolmogorovDistance(
                             [..states.Values], [..prevNormalizedStats[agent].Values],
-                            states.Count, out double genError
+                            out double genError
                         );
                         CurrentGenerationError = Math.Min(genError, CurrentGenerationError);
                     }
