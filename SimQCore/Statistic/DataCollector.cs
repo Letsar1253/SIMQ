@@ -56,12 +56,12 @@ namespace SimQCore.Statistic {
         /// <summary>
         /// Текущее количество событий.
         /// </summary>
-        private double CurrentEventsAmount = 0;
+        public double CurrentEventsAmount = 0;
 
         /// <summary>
         /// Текущий показатель ошибки генерации.
         /// </summary>
-        private double CurrentGenerationError = 1;
+        public double CurrentGenerationError = 1;
 
         /// <summary>
         /// Текущее модельное время.

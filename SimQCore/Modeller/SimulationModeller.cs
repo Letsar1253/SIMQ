@@ -6,14 +6,17 @@ namespace SimQCore.Modeller {
         /// <summary>
         /// Флаг определяет, закончено ли моделирование текущей задачи.
         /// </summary>
+
         private bool isDone =>
-            ( DateTime.Now - StartRealTime ).TotalSeconds >= problem.MaxRealTime
+            (DateTime.Now - StartRealTime).TotalSeconds >= problem.MaxRealTime
                 || dataCollector.isDone;
 
         /// <summary>
         /// Отметка времени начала моделирования.
         /// </summary>
         private DateTime StartRealTime;
+
+        public double EndRealTime;
 
         /// <summary>
         /// Моделируемая задача.
@@ -48,6 +51,8 @@ namespace SimQCore.Modeller {
                 // Запустим событие
                 supervisor.FireEvent( nextEvent );
             }
+
+            EndRealTime = (DateTime.Now - StartRealTime).TotalSeconds;
 
             Misc.Log( "Моделирование окончено.", LogStatus.WARNING );
 

@@ -19,21 +19,21 @@ namespace SimQCore {
 
             double La = 2;
             double Mu = 1;
-            int S = 4;
+            int S = int.MaxValue;
             int Q = 5;
 
             GenerationErrorSettings ges = new()
             {
                 GenerationErrorCheckStep = 1000,
                 GenerationErrorCheckStepModifier = 2,
-                MinGenerationError = 0.00001
+                MinGenerationError = 0.0001
             };
-            int MaxEventsAmount = 1_000_000;
-            int MaxRealTime = 30 * 60;
-            double MaxModelationTime = 10000;
+            int MaxRealTime = 10; // 30 * 60; // секундах
+            int MaxEventsAmount = 1_000_000_000; // количество событий
+            double MaxModelationTime = 100000000; // модельное время
 
-            Problem problem = RunQS.RunQS.InitFinServiceBlockProblem(ges, La, Mu, S, Q, MaxEventsAmount, MaxRealTime, MaxModelationTime);
-            //Problem problem = RunQS.RunQS.InitInfServiceBlockProblem(0.2, 0.5);
+
+            Problem problem = Simulation.RunQS.InitProblem(ges, La, Mu, S, Q, MaxRealTime, MaxEventsAmount, MaxModelationTime);
 
             SimulationModeller modeller = new();
             modeller.Simulate( problem );
@@ -43,6 +43,15 @@ namespace SimQCore {
 
             StatesStatistic StatesStat = new(modeller.dataCollector);
             StatesStat.Print_EmpDist();
+
+            Console.WriteLine(problem.Name);
+            Console.WriteLine($"EndRealTime = {modeller.EndRealTime} (Max = {MaxRealTime})");
+            Console.WriteLine($"CurrentEventsAmount = {modeller.dataCollector.CurrentEventsAmount} (Max = {MaxEventsAmount})");
+            Console.WriteLine($"CurrentModelationTime = {modeller.dataCollector.CurrentModelationTime} (Max = {MaxModelationTime})");
+
+            Console.WriteLine($"CurrentGenerationError = {modeller.dataCollector.CurrentGenerationError:E} (Min = {ges.MinGenerationError:E}) ({modeller.dataCollector.CurrentGenerationError < ges.MinGenerationError})");
+
+
 
             // сохранить эмпирическое распределение в массиве Y
             StatesStat.Get_EmpDist(out double[] Y);

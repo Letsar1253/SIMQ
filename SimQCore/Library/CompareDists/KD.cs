@@ -11,14 +11,14 @@ namespace SimQCore.Library.CompareDists {
 
         public static bool KolmogorovDistance(double[] dist1, double[] dist2, out double kolmogorovDistance)
         {
-            int N = dist1.Length;
+            int N = Math.Min(dist1.Length, dist2.Length);
 
             double tempMax = double.MinValue;
             double tempDif;
 
             for (int i = 0; i < N; i++)
             {
-                tempDif = Math.Abs(dist1[i] - dist2.Length < i ? 0 : dist2[i] );
+                tempDif = Math.Abs(dist1[i] - dist2[i]);
                 if (tempDif > tempMax)
                 {
                     tempMax = tempDif;
