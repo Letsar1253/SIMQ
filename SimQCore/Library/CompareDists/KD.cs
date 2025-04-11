@@ -2,9 +2,9 @@
 
 namespace SimQCore.Library.CompareDists {
     //Kolmogorov Distance
-    public class KD : ICompareDists
+    public class KD : CompareDistsTests
     {
-        public bool CompareDists(double[] dist1, double[] dist2, out double result)
+        public override bool CompareDists(double[] dist1, double[] dist2, out double result)
         {
             return KolmogorovDistance( dist1, dist2, out result );
         }
@@ -29,5 +29,6 @@ namespace SimQCore.Library.CompareDists {
 
             return true;
         }
+
     }
 }

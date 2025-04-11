@@ -23,10 +23,10 @@ namespace SimQCore.Simulation
         // M/M/S/Q 
         // M/M/S/inf (если Q == int.MaxValue //Models/CommonModels.cs/QueueBuffer)
         // M/M/inf (если S == int.MaxValue)
-        public bool RunQS_GetModel(GenerationErrorSettings ges, out SimulationModeller modeller, double La = 1, double Mu = 2, int S = 1, int Q = 0,
+        public bool RunQS_GetModelAndProblem(GenerationErrorSettings ges, out SimulationModeller modeller, out Problem problem, double La = 1, double Mu = 2, int S = 1, int Q = 0,
                                         int maxRealTime = 30 * 60, int maxEventsAmount = 1_000_000, double maxModelationTime = 10000)
         {
-            Problem problem = InitProblem(ges, La, Mu, S, Q, maxRealTime, maxEventsAmount, maxModelationTime);
+            problem = InitProblem(ges, La, Mu, S, Q, maxRealTime, maxEventsAmount, maxModelationTime);
 
             modeller = new();
 

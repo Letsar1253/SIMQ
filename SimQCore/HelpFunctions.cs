@@ -23,4 +23,14 @@ namespace SimQCore
         }
     }
 
+
+
+
+    public struct Type_Name(string type, string name = "")
+    {
+        public string Type = type;
+#nullable enable
+        public string? Name = name;
+    }
+
 }

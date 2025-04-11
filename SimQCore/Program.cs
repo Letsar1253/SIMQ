@@ -26,7 +26,7 @@ namespace SimQCore {
             {
                 GenerationErrorCheckStep = 1000,
                 GenerationErrorCheckStepModifier = 2,
-                MinGenerationError = 0.0001
+                MinGenerationError = 0.001
             };
             int MaxRealTime = 10; // 30 * 60; // секундах
             int MaxEventsAmount = 1_000_000_000; // количество событий
